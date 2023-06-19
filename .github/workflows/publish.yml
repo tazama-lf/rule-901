@@ -26,6 +26,8 @@ jobs:
           cache: 'npm'
       - name: Install dependencies 
         run: pnpm install
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
   lint-and-test:
     needs: build
     runs-on: ubuntu-latest
@@ -36,11 +38,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16'
-      - name: Set up npm registry authentication
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.GH_TOKEN }}" > ~/.npmrc
-      - name: Install library dependencies and fetch package
-        run: npm install @frmscoe/frms-coe-lib
       - name: Install dependencies
         run: npm install
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Run unit tests
         run: npm run test
