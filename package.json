@@ -7,7 +7,7 @@
     "build": "tsc --project tsconfig.json",
     "fix:eslint": "eslint --fix \"**/*.ts\"",
     "fix:prettier": "prettier --write \"**/*.ts\"",
-    "test": "npm run test"
+    "test": "jest --config=jest.config.ts --passWithNoTests --runInBand --detectOpenHandles --forceExit"
   },
   "repository": {
     "type": "git",
