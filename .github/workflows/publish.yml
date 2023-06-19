@@ -46,3 +46,9 @@ jobs:
           GH_TOKEN: '${{ secrets.GH_TOKEN_ENV_PUBLIC}}'
       - name: Run unit tests
         run: npm run test
+      - name: Build library
+        run: npm run build        
+      - name: Publish package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
