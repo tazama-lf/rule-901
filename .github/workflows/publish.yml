@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies 
         run: pnpm install
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN_LOCAL}}
   lint-and-test:
     needs: build
     runs-on: ubuntu-latest
