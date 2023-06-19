@@ -41,6 +41,6 @@ jobs:
       - name: Install dependencies
         run: npm install
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN_LOCAL}}
+          GH_TOKEN: '${{ secrets.GH_TOKEN_LOCAL}}'
       - name: Run unit tests
         run: npm run test
