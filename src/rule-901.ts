@@ -1,5 +1,6 @@
 import { DatabaseManagerInstance, LoggerService, ManagerConfig } from '@frmscoe/frms-coe-lib';
 import { DataCache, RuleConfig, RuleRequest, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
+import { aql } from 'arangojs';
 
 export async function handleTransaction(
     req: RuleRequest,
@@ -11,10 +12,12 @@ export async function handleTransaction(
     dataCache: DataCache
 ): Promise<RuleResult> {
     loggerService.log("Rule Received request", "handleTransaction");
-    if(!ruleConfig.config.timeframes[0].threshold) throw new Error("Config Threshold not specified");
-    if(!dataCache.dbtrAcctId) throw new Error("Data Cache does not have required dbtrAcctId");
+    // Throw errors early if something we know we need is not provided - Guard Pattern
+    if (!ruleConfig?.config?.timeframes[0]?.threshold) throw new Error("Config Threshold not specified");
+    if (!dataCache?.dbtrAcctId) throw new Error("Data Cache does not have required dbtrAcctId");
 
-    const transactionAmount = await (await databaseManager._pseudonymsDb.query(`
+    // Query database to get all transactions from this debtor in the timespan configured. 
+    const transactionAmount = await (await databaseManager._pseudonymsDb.query(aql`
         FOR 
             doc
         IN 
@@ -27,13 +30,12 @@ export async function handleTransaction(
         RETURN 
             length
     `)).batches.all();
-    if (!transactionAmount || !transactionAmount[0] || transactionAmount[0][0])
+
+
+    if (!transactionAmount || !transactionAmount[0] || !transactionAmount[0][0])
         throw new Error("Error while retrieving transaction history information");
 
-    const outcome = await determineOutcome(transactionAmount[0][0], ruleConfig, ruleRes);
-    ruleRes.reason = outcome.reason;
-    ruleRes.result = outcome.result;
-    ruleRes.subRuleRef = outcome.subRuleRef;
+    ruleRes = await determineOutcome(transactionAmount[0][0], ruleConfig, ruleRes);
     loggerService.log(`Rule ${ruleRes.id}@${ruleRes.cfg} processed with outcome: ${ruleRes.subRuleRef}`);
     return ruleRes;
 }
