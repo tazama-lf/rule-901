@@ -17,14 +17,16 @@ export async function handleTransaction(
     if (!dataCache?.dbtrAcctId) throw new Error("Data Cache does not have required dbtrAcctId");
 
     // Query database to get all transactions from this debtor in the timespan configured. 
+    const debtorAccount = `accounts/${dataCache.dbtrAcctId}`;
+    const debtorAccountAql = aql`${debtorAccount}`;
     const transactionAmount = await (await databaseManager._pseudonymsDb.query(aql`
         FOR 
             doc
         IN 
             transactionRelationship
         FILTER
-            doc.TxTp=="pacs.002.001.12"
-            AND doc._from=="accounts/${dataCache.dbtrAcctId}"
+            doc.TxTp=='pacs.002.001.12'
+            AND doc._from==${debtorAccountAql}
             AND DATE_DIFF(DATE_TIMESTAMP(doc.CreDtTm), DATE_NOW(), "millisecond", false) <= ${ruleConfig.config.timeframes[0].threshold}
         COLLECT WITH COUNT INTO length
         RETURN 
@@ -32,7 +34,7 @@ export async function handleTransaction(
     `)).batches.all();
 
 
-    if (!transactionAmount || !transactionAmount[0] || !transactionAmount[0][0])
+    if (!transactionAmount || !transactionAmount[0] || (transactionAmount[0][0] === undefined))
         throw new Error("Error while retrieving transaction history information");
 
     ruleRes = await determineOutcome(transactionAmount[0][0], ruleConfig, ruleRes);
