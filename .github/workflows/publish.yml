@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - 'main'
+      - 'data_cache_resolve'
 
 jobs:
   build-and-publish:
