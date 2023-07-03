@@ -20,7 +20,7 @@ export async function handleTransaction(
     const debtorAccountIdAql = aql`${debtorAccountId}`;
 
     // Query database to get all transactions from this debtor in the timespan configured. 
-    const debtorAccount = `accounts/${req.DataCache..dbtrAcctId}`;
+    const debtorAccount = `accounts/${req.DataCache.dbtrAcctId}`;
     const debtorAccountAql = aql`${debtorAccount}`;
     const transactionAmount = await (await databaseManager._pseudonymsDb.query(aql`
         FOR 
