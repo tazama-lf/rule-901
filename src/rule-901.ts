@@ -1,5 +1,5 @@
 import { DatabaseManagerInstance, LoggerService, ManagerConfig } from '@frmscoe/frms-coe-lib';
-import { DataCache, RuleConfig, RuleRequest, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
+import {  RuleConfig, RuleRequest, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { aql } from 'arangojs';
 
 export async function handleTransaction(
@@ -9,12 +9,15 @@ export async function handleTransaction(
     loggerService: LoggerService,
     ruleConfig: RuleConfig,
     databaseManager: DatabaseManagerInstance<ManagerConfig>,
-    dataCache: DataCache
 ): Promise<RuleResult> {
     loggerService.log("Rule Received request", "handleTransaction");
     // Throw errors early if something we know we need is not provided - Guard Pattern
+    if (!ruleConfig?.config?.timeframes) throw new Error("No timeframs were provided by config")
     if (!ruleConfig?.config?.timeframes[0]?.threshold) throw new Error("Config Threshold not specified");
-    if (!dataCache?.dbtrAcctId) throw new Error("Data Cache does not have required dbtrAcctId");
+    if (!req.DataCache.dbtrAcctId) throw new Error("Data Cache does not have required dbtrAcctId");
+
+    const debtorAccountId = `accounts/${req.DataCache.dbtrAcctId}`;
+    const debtorAccountIdAql = aql`${debtorAccountId}`;
 
     // Query database to get all transactions from this debtor in the timespan configured. 
     const transactionAmount = await (await databaseManager._pseudonymsDb.query(aql`
@@ -24,7 +27,7 @@ export async function handleTransaction(
             transactionRelationship
         FILTER
             doc.TxTp=="pacs.002.001.12"
-            AND doc._from=="accounts/${dataCache.dbtrAcctId}"
+            AND doc._from == ${debtorAccountIdAql}
             AND DATE_DIFF(DATE_TIMESTAMP(doc.CreDtTm), DATE_NOW(), "millisecond", false) <= ${ruleConfig.config.timeframes[0].threshold}
         COLLECT WITH COUNT INTO length
         RETURN 
