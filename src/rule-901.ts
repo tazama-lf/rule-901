@@ -20,6 +20,8 @@ export async function handleTransaction(
     const debtorAccountIdAql = aql`${debtorAccountId}`;
 
     // Query database to get all transactions from this debtor in the timespan configured. 
+    const debtorAccount = `accounts/${dataCache.dbtrAcctId}`;
+    const debtorAccountAql = aql`${debtorAccount}`;
     const transactionAmount = await (await databaseManager._pseudonymsDb.query(aql`
         FOR 
             doc
@@ -35,7 +37,7 @@ export async function handleTransaction(
     `)).batches.all();
 
 
-    if (!transactionAmount || !transactionAmount[0] || !transactionAmount[0][0])
+    if (!transactionAmount || !transactionAmount[0] || (transactionAmount[0][0] === undefined))
         throw new Error("Error while retrieving transaction history information");
 
     ruleRes = await determineOutcome(transactionAmount[0][0], ruleConfig, ruleRes);
