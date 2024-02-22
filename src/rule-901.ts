@@ -1,6 +1,5 @@
-import { DatabaseManagerInstance, LoggerService, ManagerConfig } from '@frmscoe/frms-coe-lib';
+import { DatabaseManagerInstance, LoggerService, ManagerConfig, aql } from '@frmscoe/frms-coe-lib';
 import {  RuleConfig, RuleRequest, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { aql } from 'arangojs';
 
 export async function handleTransaction(
     req: RuleRequest,
@@ -20,8 +19,6 @@ export async function handleTransaction(
     const debtorAccountIdAql = aql`${debtorAccountId}`;
 
     // Query database to get all transactions from this debtor in the timespan configured. 
-    const debtorAccount = `accounts/${req.DataCache.dbtrAcctId}`;
-    const debtorAccountAql = aql`${debtorAccount}`;
     const transactionAmount = await (await databaseManager._pseudonymsDb.query(aql`
         FOR 
             doc
@@ -40,7 +37,7 @@ export async function handleTransaction(
     if (!transactionAmount || !transactionAmount[0] || (transactionAmount[0][0] === undefined))
         throw new Error("Error while retrieving transaction history information");
 
-    ruleRes = await determineOutcome(transactionAmount[0][0], ruleConfig, ruleRes);
+    ruleRes = determineOutcome(transactionAmount[0][0], ruleConfig, ruleRes);
     loggerService.log(`Rule ${ruleRes.id}@${ruleRes.cfg} processed with outcome: ${ruleRes.subRuleRef}`);
     return ruleRes;
 }
