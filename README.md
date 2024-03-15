@@ -1,46 +1,45 @@
 # Rule-901
-Amount of transactions debtor made
+Number of outgoing transactions - debtor
 
 # Sample configuration
 ```json
 {
-    "id": "901@1.0.0",
-    "cfg": "1.0.0",
-    "desc": "Amount of transactions debtor made",
-    "config": {
-      "exitConditions": [
-        {
-          "subRuleRef": ".x00",
-          "outcome": false,
-          "reason": "Unsuccessful transaction"
-        }
-      ],
-      "timeframes": [
-        {
-          "threshold": 86400000
-        }
-      ],
-      "bands": [
-        {
-          "subRuleRef": ".01",
-          "upperLimit": 2,
-          "outcome": true,
-          "reason": "Debtor made less than two transactions"
-        },
-        {
-          "subRuleRef": ".02",
-          "lowerLimit": 2,
-          "upperLimit": 3,
-          "outcome": true,
-          "reason": "Debtor made three transactions"
-        },
-        {
-          "subRuleRef": ".03",
-          "lowerLimit": 3,
-          "outcome": false,
-          "reason": "Debtor made four or more transactions"
-        }
-      ]
-    }
+  "_key": "901@1.0.0@1.0.0",
+  "id": "901@1.0.0",
+  "cfg": "1.0.0",
+  "desc": "Number of outgoing transactions - debtor",
+  "config": {
+    "parameters": {
+      "maxQueryRange": 86400000
+    },
+    "exitConditions": [
+      {
+        "subRuleRef": ".x00",
+        "outcome": false,
+        "reason": "Incoming transaction is unsuccessful"
+      },
+    ],
+    "bands": [
+      {
+        "subRuleRef": ".01",
+        "upperLimit": 2,
+        "outcome": true,
+        "reason": "The debtor has performed one transaction to date"
+      },
+      {
+        "subRuleRef": ".02",
+        "lowerLimit": 2,
+        "upperLimit": 4,
+        "outcome": true,
+        "reason": "The debtor has performed two or three transactions to date"
+      },
+      {
+        "subRuleRef": ".03",
+        "lowerLimit": 4,
+        "outcome": true,
+        "reason": "The debtor has performed 4 or more transactions to date"
+      }
+    ]
   }
+}
 ```
