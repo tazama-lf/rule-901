@@ -31,7 +31,7 @@ const getMockRequest = (): RuleRequest => {
     ),
 
     networkMap: JSON.parse(
-      '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0.0","txTp":"pain.001.001.11","channels":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0.0","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"028@1.0","rules":[{"id":"004@1.0.0","host":"http://openfaas:8080","cfg":"1.0.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0.0"}]},{"id":"029@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"029@1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"005@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]},{"id":"002@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"030@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"030@1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"006@1.0","host":"http://openfaas:8080","cfg":"1.0"}]},{"id":"031@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"031@1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"007@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}]}',
+      '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"004@1.0.0","cfg":"1.0.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0.0","cfg":"1.0.0","typologies":[{"id":"901@1.0.0","cfg":"028@1.0","rules":[{"id":"004@1.0.0","cfg":"1.0.0"},{"id":"028@1.0","cfg":"1.0.0"}]},{"id":"029@1.0","cfg":"029@1.0","rules":[{"id":"003@1.0","cfg":"1.0"},{"id":"005@1.0","cfg":"1.0"}]}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"030@1.0","cfg":"030@1.0","rules":[{"id":"003@1.0","cfg":"1.0"},{"id":"006@1.0","cfg":"1.0"}]},{"id":"031@1.0","cfg":"031@1.0","rules":[{"id":"003@1.0","cfg":"1.0"},{"id":"007@1.0","cfg":"1.0"}]}]}]}]}',
     ),
     DataCache: {
       dbtrId: 'dbtr_516c7065d75b4fcea6fffb52a9539357',
@@ -52,6 +52,7 @@ const databaseManagerConfig = {
     url: '',
   },
 };
+
 let databaseManager: DatabaseManagerInstance<typeof databaseManagerConfig>;
 let ruleRes: RuleResult;
 const loggerService: LoggerService = new LoggerService();
@@ -90,9 +91,9 @@ const ruleConfig: RuleConfig = {
         lowerLimit: 4,
         outcome: true,
         reason: 'The debtor has performed 4 or more transactions to date',
-      },
-    ],
-  },
+      }
+    ]
+  }
 };
 
 beforeAll(async () => {
