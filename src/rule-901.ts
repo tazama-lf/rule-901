@@ -1,43 +1,143 @@
-import { DatabaseManagerInstance, LoggerService, ManagerConfig, aql } from '@frmscoe/frms-coe-lib';
-import {  RuleConfig, RuleRequest, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
+// SPDX-License-Identifier: Apache-2.0
+
+import {
+  aql,
+  type DatabaseManagerInstance,
+  type LoggerService,
+  type ManagerConfig,
+} from '@frmscoe/frms-coe-lib';
+import {
+  type OutcomeResult,
+  type RuleConfig,
+  type RuleRequest,
+  type RuleResult,
+} from '@frmscoe/frms-coe-lib/lib/interfaces';
+import { unwrap } from '@frmscoe/frms-coe-lib/lib/helpers/unwrap';
 
 export async function handleTransaction(
-    req: RuleRequest,
-    determineOutcome: (value: number, ruleConfig: RuleConfig, ruleResult: RuleResult) => RuleResult,
-    ruleRes: RuleResult,
-    loggerService: LoggerService,
+  req: RuleRequest,
+  determineOutcome: (
+    value: number,
     ruleConfig: RuleConfig,
-    databaseManager: DatabaseManagerInstance<ManagerConfig>,
+    ruleResult: RuleResult,
+  ) => RuleResult,
+  ruleRes: RuleResult,
+  loggerService: LoggerService,
+  ruleConfig: RuleConfig,
+  databaseManager: DatabaseManagerInstance<ManagerConfig>,
 ): Promise<RuleResult> {
-    loggerService.log("Rule Received request", "handleTransaction");
-    // Throw errors early if something we know we need is not provided - Guard Pattern
-    if (!ruleConfig?.config?.timeframes) throw new Error("No timeframs were provided by config")
-    if (!ruleConfig?.config?.timeframes[0]?.threshold) throw new Error("Config Threshold not specified");
-    if (!req.DataCache.dbtrAcctId) throw new Error("Data Cache does not have required dbtrAcctId");
 
-    const debtorAccountId = `accounts/${req.DataCache.dbtrAcctId}`;
-    const debtorAccountIdAql = aql`${debtorAccountId}`;
+  let context = `Rule-${ruleConfig.id} handleTransaction()`
+  let msgId = req.transaction.FIToFIPmtSts.GrpHdr.MsgId
 
-    // Query database to get all transactions from this debtor in the timespan configured. 
-    const transactionAmount = await (await databaseManager._pseudonymsDb.query(aql`
-        FOR 
-            doc
-        IN 
-            transactionRelationship
-        FILTER
-            doc.TxTp=="pacs.002.001.12"
-            AND doc._from == ${debtorAccountIdAql}
-            AND DATE_DIFF(DATE_TIMESTAMP(doc.CreDtTm), DATE_NOW(), "millisecond", false) <= ${ruleConfig.config.timeframes[0].threshold}
-        COLLECT WITH COUNT INTO length
-        RETURN 
-            length
-    `)).batches.all();
+  loggerService.log(
+    'Start - handle transaction',
+    context,
+    msgId,
+  );
 
+  // Throw errors early if something we know we need is not provided - Guard Pattern
+  if (!ruleConfig?.config?.bands || !ruleConfig.config.bands.length)
+    throw new Error('Invalid config provided - bands not provided or empty');
+  if (!ruleConfig.config.exitConditions)
+    throw new Error('Invalid config provided - exitConditions not provided');
+  if (!ruleConfig.config.parameters)
+    throw new Error('Invalid config provided - parameters not provided');
+  if (!ruleConfig.config.parameters.maxQueryRange)
+    throw new Error(
+      'Invalid config provided - maxQueryRange parameter not provided',
+    );
+  if (!req.DataCache?.dbtrAcctId)
+    throw new Error('Data Cache does not have required dbtrAcctId');
 
-    if (!transactionAmount || !transactionAmount[0] || (transactionAmount[0][0] === undefined))
-        throw new Error("Error while retrieving transaction history information");
+  // Step 1: Early exit conditions
 
-    ruleRes = determineOutcome(transactionAmount[0][0], ruleConfig, ruleRes);
-    loggerService.log(`Rule ${ruleRes.id}@${ruleRes.cfg} processed with outcome: ${ruleRes.subRuleRef}`);
-    return ruleRes;
+  loggerService.log(
+    'Step 1 - Early exit conditions',
+    context,
+    msgId,
+  );
+
+  const UnsuccessfulTransaction = ruleConfig.config.exitConditions.find(
+    (b: OutcomeResult) => b.subRuleRef === '.x00',
+  );
+
+  if (req.transaction.FIToFIPmtSts.TxInfAndSts.TxSts !== 'ACCC') {
+    if (UnsuccessfulTransaction === undefined)
+      throw new Error(
+        'Unsuccessful transaction and no exit condition in config',
+      );
+
+    return {
+      ...ruleRes,
+      reason: UnsuccessfulTransaction.reason,
+      subRuleRef: UnsuccessfulTransaction.subRuleRef,
+      result: UnsuccessfulTransaction.outcome,
+    };
+  }
+
+  // Step 2: Query Setup 
+
+  loggerService.log(
+    'Step 2 - Query setup',
+    context,
+    msgId,
+  );
+
+  const currentPacs002TimeFrame = req.transaction.FIToFIPmtSts.GrpHdr.CreDtTm;
+  const debtorAccountId = `accounts/${req.DataCache.dbtrAcctId}`;
+  const debtorAccIdAql = aql`${debtorAccountId}`;
+  const maxQueryRange: number = ruleConfig.config.parameters.maxQueryRange as number;
+  const maxQueryRangeAql = aql` AND DATE_TIMESTAMP(${currentPacs002TimeFrame}) - DATE_TIMESTAMP(pacs002.CreDtTm) <= ${maxQueryRange}`;
+
+  const queryString = aql`FOR pacs002 IN transactionRelationship
+    FILTER pacs002._to == ${debtorAccIdAql}
+    AND pacs002.TxTp == 'pacs.002.001.12'
+    ${maxQueryRangeAql}
+    AND pacs002.CreDtTm <= ${currentPacs002TimeFrame}
+    COLLECT WITH COUNT INTO length
+  RETURN length`;
+
+  // Step 3: Query Execution 
+
+  loggerService.log(
+    'Step 3 - Query execution',
+    context,
+    msgId,
+  );
+
+  const numberOfRecentTransactions = await (
+    await databaseManager._pseudonymsDb.query(queryString)
+  ).batches.all();
+
+  // Step 4: Query post-processing
+
+  loggerService.log(
+    'Step 4 - Query post-processing',
+    context,
+    msgId,
+  );
+
+  const count = unwrap(numberOfRecentTransactions);
+
+  if (count == null) {
+    // 0 is a legal value
+    throw new Error('Data error: irretrievable transaction history');
+  }
+
+  if (typeof count !== 'number') {
+    throw new Error(
+      'Data error: query result type mismatch - expected a number',
+    );
+  }
+
+  // Return control to the rule-executer for rule result calculation
+
+  loggerService.log(
+    'End - handle transaction',
+    context,
+    msgId,
+  );
+
+  return determineOutcome(count, ruleConfig, ruleRes);
 }
