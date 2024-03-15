@@ -33,11 +33,18 @@ const getMockRequest = (): RuleRequest => {
     networkMap: JSON.parse(
       '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"004@1.0.0","cfg":"1.0.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0.0","cfg":"1.0.0","typologies":[{"id":"901@1.0.0","cfg":"028@1.0","rules":[{"id":"004@1.0.0","cfg":"1.0.0"},{"id":"028@1.0","cfg":"1.0.0"}]},{"id":"029@1.0","cfg":"029@1.0","rules":[{"id":"003@1.0","cfg":"1.0"},{"id":"005@1.0","cfg":"1.0"}]}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"030@1.0","cfg":"030@1.0","rules":[{"id":"003@1.0","cfg":"1.0"},{"id":"006@1.0","cfg":"1.0"}]},{"id":"031@1.0","cfg":"031@1.0","rules":[{"id":"003@1.0","cfg":"1.0"},{"id":"007@1.0","cfg":"1.0"}]}]}]}]}',
     ),
+
     DataCache: {
       dbtrId: 'dbtr_516c7065d75b4fcea6fffb52a9539357',
       cdtrId: 'cdtr_b086a1e193794192b32c8af8550d721d',
       dbtrAcctId: 'dbtrAcct_1fd08e408c184dd28cbaeef03bff1af5',
       cdtrAcctId: 'cdtrAcct_d531e1ba4ed84a248fe26617e79fcb64',
+      evtId: 'eventId',
+      amt: {
+        amt: 1234.56,
+        ccy: 'XTS'
+      },
+      creDtTm: `${new Date( Date.now() - 60 * 1000).toISOString()}`
     },
   };
   return quote as RuleRequest;
