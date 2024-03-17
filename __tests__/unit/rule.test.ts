@@ -44,7 +44,7 @@ const getMockRequest = (): RuleRequest => {
         amt: 1234.56,
         ccy: 'XTS'
       },
-      creDtTm: `${new Date( Date.now() - 60 * 1000).toISOString()}`
+      creDtTm: `${new Date(Date.now() - 60 * 1000).toISOString()}`
     },
   };
   return quote as RuleRequest;
@@ -260,6 +260,28 @@ describe('Happy path', () => {
 
 describe('Exit conditions', () => {
 
+  test('Should respond with .x00: Incoming transaction is unsuccessful', async () => {
+    const mockQueryFn = jest.fn();
+
+    const objClone = (req: Object) => JSON.parse(JSON.stringify(req));
+    const newReq: RuleRequest = objClone(req);
+    newReq.transaction.FIToFIPmtSts.TxInfAndSts.TxSts = 'something else';
+    const res = await handleTransaction(
+      newReq,
+      determineOutcome,
+      ruleRes,
+      loggerService,
+      ruleConfig,
+      databaseManager,
+    );
+
+    expect(res).toEqual(
+      JSON.parse(
+        '{"id":"901@1.0.0", "cfg":"1.0.0","result":false,"subRuleRef":".x00","reason":"Incoming transaction is unsuccessful"}',
+      ),
+    );
+  });
+
 });
 
 describe('Error conditions', () => {
@@ -447,7 +469,7 @@ describe('Error conditions', () => {
         'Invalid config provided - parameters not provided',
       );
     }
-    
+
     try {
       await handleTransaction(
         req,
