@@ -30,7 +30,7 @@ export async function handleTransaction(
   const context = `Rule-${ruleConfig?.id ? ruleConfig.id : '<unresolved>'} handleTransaction()`;
   const msgId = req.transaction.FIToFIPmtSts.GrpHdr.MsgId
 
-  loggerService.log(
+  loggerService.trace(
     'Start - handle transaction',
     context,
     msgId,
@@ -52,7 +52,7 @@ export async function handleTransaction(
 
   // Step 1: Early exit conditions
 
-  loggerService.log(
+  loggerService.trace(
     'Step 1 - Early exit conditions',
     context,
     msgId,
@@ -78,7 +78,7 @@ export async function handleTransaction(
 
   // Step 2: Query Setup 
 
-  loggerService.log(
+  loggerService.trace(
     'Step 2 - Query setup',
     context,
     msgId,
@@ -100,7 +100,7 @@ export async function handleTransaction(
 
   // Step 3: Query Execution 
 
-  loggerService.log(
+  loggerService.trace(
     'Step 3 - Query execution',
     context,
     msgId,
@@ -112,7 +112,7 @@ export async function handleTransaction(
 
   // Step 4: Query post-processing
 
-  loggerService.log(
+  loggerService.trace(
     'Step 4 - Query post-processing',
     context,
     msgId,
@@ -133,7 +133,7 @@ export async function handleTransaction(
 
   // Return control to the rule-executer for rule result calculation
 
-  loggerService.log(
+  loggerService.trace(
     'End - handle transaction',
     context,
     msgId,
