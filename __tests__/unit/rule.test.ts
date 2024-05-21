@@ -74,8 +74,7 @@ const ruleConfig: RuleConfig = {
     },
     exitConditions: [
       {
-        "subRuleRef": ".x00",
-        
+        "subRuleRef": ".x00", 
         "reason": "Incoming transaction is unsuccessful"
       }
     ],
@@ -83,20 +82,17 @@ const ruleConfig: RuleConfig = {
       {
         subRuleRef: '.01',
         upperLimit: 2,
-        
         reason: 'The debtor has performed one transaction to date',
       },
       {
         subRuleRef: '.02',
         lowerLimit: 2,
         upperLimit: 4,
-        
         reason: 'The debtor has performed two or three transactions to date',
       },
       {
         subRuleRef: '.03',
         lowerLimit: 4,
-        
         reason: 'The debtor has performed 4 or more transactions to date',
       }
     ]
