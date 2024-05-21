@@ -1,6 +1,8 @@
 # Rule 901 Documentation
 # Overview
 
+Rules in the system has as small a purpose as possible and seeks to answer a single and very specific behavioural question about the transaction it is evaluation
+
 | Title | Derived account age - creditor 
 | ------ | ------ |
 | `Perspective` | Creditor |
@@ -54,15 +56,34 @@ The `handleTransaction` function processes a transaction according to the rules 
 ## Common Trends:
 1. **Configuration Validation**: Each rule starts with validation checks for the provided configuration. If essential configuration parameters are missing, an error is thrown to indicate an invalid configuration.
 
-2. **Data Retrieval**: The rules retrieve necessary data from external sources, such as a database. This data includes transaction details, timestamps, and other relevant information required for rule evaluation.
+2. **Exit condition before retrivial of data**: The payload data is checked for specific values that have been configured as exit conditions. If any of the checks meet the criteria of the exit condition, the rule responds with the result of the exit condition that was configured as part of the rule configuration.
 
-3. **Error Handling**: Comprehensive error handling is implemented throughout the rule logic. Errors related to missing configuration, data retrieval failures, or unexpected data types are caught and appropriately handled, ensuring robustness and reliability.
+3. **Data Retrieval**: The rules retrieve necessary data from external sources, such as a database. This data includes transaction details, timestamps, and other relevant information required for rule evaluation.
 
-4. **Time Calculations**: Time calculations play a crucial role in rule evaluation. The rules calculate time differences between various transaction events and the current time to determine the validity of certain conditions.
+4. **Error Handling**: Comprehensive error handling is implemented throughout the rule logic. Errors related to missing configuration, data retrieval failures, or unexpected data types are caught and appropriately handled, ensuring robustness and reliability.
 
-5. **Outcome Determination**: After gathering relevant data and performing necessary calculations, the rules delegate the final outcome determination to an external function (`determineOutcome`). This function evaluates the calculated parameters against the rule configuration and returns the result.
+5. **Time Calculations**: Time calculations play a crucial role in rule evaluation. The rules calculate time differences between various transaction events and the current time to determine the validity of certain conditions.
 
+6. **Exit condition after retrivial of data**: The returned data from data retrieval is checked before determining the value using the determine outcome function; these checks are configured to verify whether the returned value applies to any of the configured exit conditions. more about exit conditions follow this [link](https://github.com/frmscoe/docs/blob/main/Technical/Processors/Rule-Processors/standard-rule-processor-exit-and-error-conditions.md)
 
+7. **Outcome Determination**: After gathering relevant data and performing necessary calculations, the rules delegate the final outcome determination to an external function (`determineOutcome`). This function evaluates the calculated parameters against the rule configuration and returns the result.
+
+To read more about what can be more common about rules follow this [link](https://github.com/frmscoe/docs/blob/main/Product/rule-processor-overview.md)
+
+```mermaid
+flowchart TD
+    A[HandleTransaction] --> B{Checks of rule's configuration}
+    B --> D[return]
+    B --> C{Exit conditions checks}
+    C --> K[return]
+    C --> E(Data Retrieval)
+    E --> F{Exit conditions checks}
+    F --> J[return]
+    J --> L(Custom code)
+    L --> U(Determine outcome)
+    U --> Q[Return outcome]    
+
+```
 
 ## Publishing Rule Library
 
