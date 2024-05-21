@@ -20,7 +20,7 @@ Please consider reading more about the rule-executer. If this is your first time
 | Exit Conditions |  |
 | ------ | ------ |
 | .x00 |  |
-| .x01 |  |
+| .x01 | No verifiable creditor account activity detected  |
 | .x02 |  |
 
 ## Prerequisites
