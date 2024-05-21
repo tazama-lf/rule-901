@@ -58,7 +58,7 @@ The `handleTransaction` function processes a transaction according to the rules 
 ## Common Trends:
 1. **Configuration Validation**: Each rule starts with validation checks for the provided configuration. If essential configuration parameters are missing, an error is thrown to indicate an invalid configuration.
 
-2. **Exit condition before retrivial of data**: The payload data is checked for specific values that have been configured as exit conditions. If any of the checks meet the criteria of the exit condition, the rule responds with the result of the exit condition that was configured as part of the rule configuration.
+2. **Exit condition before retrieval of data**: The payload data is checked for specific values that have been configured as exit conditions. If any of the checks meet the criteria of the exit condition, the rule responds with the result of the exit condition that was configured as part of the rule configuration.
 
 3. **Data Retrieval**: The rules retrieve necessary data from external sources, such as a database. This data includes transaction details, timestamps, and other relevant information required for rule evaluation.
 
@@ -66,7 +66,7 @@ The `handleTransaction` function processes a transaction according to the rules 
 
 5. **Time Calculations**: Time calculations play a crucial role in rule evaluation. The rules calculate time differences between various transaction events and the current time to determine the validity of certain conditions.
 
-6. **Exit condition after retrivial of data**: The returned data from data retrieval is checked before determining the value using the determine outcome function; these checks are configured to verify whether the returned value applies to any of the configured exit conditions. more about exit conditions follow this [link](https://github.com/frmscoe/docs/blob/main/Technical/Processors/Rule-Processors/standard-rule-processor-exit-and-error-conditions.md)
+6. **(Rule-specific) query post-processing**: The returned data from data retrieval is checked before determining the value using the determine outcome function; these checks are configured to verify whether the returned value applies to any of the configured exit conditions. more about exit conditions follow this [link](https://github.com/frmscoe/docs/blob/main/Technical/Processors/Rule-Processors/standard-rule-processor-exit-and-error-conditions.md)
 
 7. **Outcome Determination**: After gathering relevant data and performing necessary calculations, the rules delegate the final outcome determination to an external function (`determineOutcome`). This function evaluates the calculated parameters against the rule configuration and returns the result.
 
