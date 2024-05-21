@@ -1,4 +1,4 @@
-# Rule Libraries Documentation
+# Rule 901 Documentation
 
 ## Prerequisites
 Before using the rule libraries, ensure you have the following prerequisites installed:
