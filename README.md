@@ -2,7 +2,7 @@
 # Overview
 Rules are libraries that consist of a single functionality. They can be installed on the rule-executer, and the rule-executer is expected to change its identity to a rule installed. This means you can only have one rule installed at a time on the rule-executer.Rules in the system has as small a purpose as possible and seeks to answer a single and very specific behavioural question about the transaction it is evaluation
 
-Please consider reading more about the rule-executor. If this is your first time learning about rules, you can follow this [link](https://github.com/frmscoe/rule-executer/blob/dev/README.md)
+Please consider reading more about the rule-executer. If this is your first time learning about rules, you can follow this [link](https://github.com/frmscoe/rule-executer/blob/dev/README.md)
  for more information.
 
 | Title | Derived account age - creditor 
