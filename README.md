@@ -1,7 +1,9 @@
 # Rule 901 Documentation
 # Overview
+Rules are libraries that consist of a single functionality. They can be installed on the rule-executor, and the rule-executor is expected to change its identity to a rule installed. This means you can only have one rule installed at a time on the rule-executer.Rules in the system has as small a purpose as possible and seeks to answer a single and very specific behavioural question about the transaction it is evaluation
 
-Rules in the system has as small a purpose as possible and seeks to answer a single and very specific behavioural question about the transaction it is evaluation
+Please consider reading more about the rule-executor. If this is your first time learning about rules, you can follow this [link](https://github.com/frmscoe/rule-executer/blob/dev/README.md)
+ for more information.
 
 | Title | Derived account age - creditor 
 | ------ | ------ |
@@ -19,7 +21,7 @@ Rules in the system has as small a purpose as possible and seeks to answer a sin
 | ------ | ------ |
 | .x00 |  |
 | .x01 |  |
-| 1 |  |
+| .x02 |  |
 
 ## Prerequisites
 Before using the rule libraries, ensure you have the following prerequisites installed:
@@ -70,16 +72,17 @@ The `handleTransaction` function processes a transaction according to the rules 
 
 To read more about what can be more common about rules follow this [link](https://github.com/frmscoe/docs/blob/main/Product/rule-processor-overview.md)
 
+## Internal process flow
 ```mermaid
 flowchart TD
-    A[HandleTransaction] --> B{Checks of rule's configuration}
-    B --> D[return]
-    B --> C{Exit conditions checks}
-    C --> K[return]
+     A[HandleTransaction] --> |Start| B{Checks of rule's configuration}
+    B --> |Log message| D[return]
+    B --> C{Exit conditions checks for payload}
+    C --> |Log message| K[return]
     C --> E(Data Retrieval)
-    E --> F{Exit conditions checks}
-    F --> J[return]
-    J --> L(Custom code)
+    E --> F{Exit conditions checks for retrieved data}
+    F --> |Log message| J[return]
+    F --> L(Custom code)
     L --> U(Determine outcome)
     U --> Q[Return outcome]    
 
