@@ -1,4 +1,23 @@
 # Rule 901 Documentation
+# Overview
+
+| Title | Derived account age - creditor 
+| ------ | ------ |
+| `Perspective` | Creditor |
+| `Historical depth` | Full system history to date |
+| `Behaviour Focus` | Fraud/AML |
+| `Description` | Models the "age" of the account based on available transacting behavior over the life of the platform |
+| `Rule result type` | Banded |
+
+| Query Parameters |  |
+| ------ | ------ |
+| 1 |  |
+
+| Exit Conditions |  |
+| ------ | ------ |
+| .x00 |  |
+| .x01 |  |
+| 1 |  |
 
 ## Prerequisites
 Before using the rule libraries, ensure you have the following prerequisites installed:
