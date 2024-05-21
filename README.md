@@ -4,7 +4,7 @@
 Before using the rule libraries, ensure you have the following prerequisites installed:
 - Node.js and npm (Node Package Manager)
 - Basic understanding of Node.js development
-- Setup a GitHub Token (you can follow this [link](https://github.com/frmscoe/docs/blob/dev/Guides/full-service-full-stack-docker-tazama.md#1-update-the-npmrc-file))
+- Setup a GitHub Token (you can follow this [link](https://github.com/frmscoe/docs/blob/dev/Knowledge-Articles/How-To-Use-.npmrc-To-Hide-Secrets.md))
 
 ## Installation
 To install a rule library, use npm:
