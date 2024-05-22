@@ -1,4 +1,15 @@
 # Rule 901 Documentation
+
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [handleTransaction Function](#handletransaction-function)
+- [Common Trends](#common-trends)
+- [Internal process flow](#internal-process-flow)
+- [Publishing Rule Library](#publishing-rule-library:)
+- [Workflow Explanation](#workflow-explanation:)
+   - [Note](#note)
+
 # Overview
 Rules are libraries that consist of a single functionality. They can be installed on the rule-executer, and the rule-executer is expected to change its identity to a rule installed. This means you can only have one rule installed at a time on the rule-executer.Rules in the system has as small a purpose as possible and seeks to answer a single and very specific behavioural question about the transaction it is evaluation
 
@@ -114,7 +125,7 @@ To publish the Rule library, you need to set up a continuous integration (CI) wo
    - `GH_TOKEN`: GitHub token for authentication.
    - `NODE_AUTH_TOKEN`: Node.js authentication token. In this case, it's set to the same GitHub token.
 
-#### Note:
+#### Note
 - Make sure to replace `@frmscoe` with your actual scope name in the `.yaml` file.
 - Ensure that you have set up the appropriate GitHub token (`GITHUB_TOKEN`) with necessary permissions for publishing packages.
 - Adjust the `npm run build` command as per your project setup.
