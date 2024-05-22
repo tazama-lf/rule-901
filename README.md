@@ -18,10 +18,10 @@ Consider reading more about the rule-executer. If this is your first time learni
 
 | Title |  |
 | ------ | ------ |
+| `Description` |  |
 | `Perspective` |  |
 | `Historical depth` |  |
 | `Behaviour Focus` |  |
-| `Description` |  |
 | `Rule result type` |  |
 
 | Query Parameters |  |
