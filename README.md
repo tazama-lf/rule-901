@@ -6,8 +6,8 @@
 - [handleTransaction Function](#handletransaction-function)
 - [Common Trends](#common-trends)
 - [Internal process flow](#internal-process-flow)
-- [Publishing Rule Library](#publishing-rule-library:)
-- [Workflow Explanation](#workflow-explanation:)
+- [Publishing Rule Library](#publishing-rule-library)
+- [Workflow Explanation](#workflow-explanation)
    - [Note](#note)
 
 # Overview
@@ -125,7 +125,7 @@ To publish the Rule library, you need to set up a continuous integration (CI) wo
    - `GH_TOKEN`: GitHub token for authentication.
    - `NODE_AUTH_TOKEN`: Node.js authentication token. In this case, it's set to the same GitHub token.
 
-#### Note
+#### Note:
 - Make sure to replace `@frmscoe` with your actual scope name in the `.yaml` file.
 - Ensure that you have set up the appropriate GitHub token (`GITHUB_TOKEN`) with necessary permissions for publishing packages.
 - Adjust the `npm run build` command as per your project setup.
