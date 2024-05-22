@@ -28,10 +28,8 @@ Consider reading more about the rule-executer. If this is your first time learni
 | ------ | ------ |
 
 
-
 | Exit Conditions |  |
 | ------ | ------ |
-
 
 
 ## Prerequisites
@@ -93,7 +91,7 @@ flowchart TD
     C --> E(Data Retrieval)
     E --> F{Exit conditions checks for retrieved data}
     F --> |Log message| J[return]
-    F --> L(Custom code)
+    F --> L("(Rule-specific)query post-processing")
     L --> U(Determine outcome)
     U --> Q[Return outcome]    
 
