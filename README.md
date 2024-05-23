@@ -18,18 +18,20 @@ Consider reading more about the rule-executer. If this is your first time learni
 
 | Title |  |
 | ------ | ------ |
-| `Description` |  |
+| `Description` | Number of outgoing transactions - debtor |
 | `Perspective` |  |
 | `Historical depth` |  |
 | `Behaviour Focus` |  |
-| `Rule result type` |  |
+| `Rule result type` | Banded |
 
 | Query Parameters |  |
 | ------ | ------ |
+| `1` | maxQueryRange |
 
 
 | Exit Conditions |  |
 | ------ | ------ |
+| `.x00` | Incoming transaction is unsuccessful |
 
 
 ## Prerequisites
@@ -91,7 +93,7 @@ flowchart TD
     C --> E(Data Retrieval)
     E --> F{Exit conditions checks for retrieved data}
     F --> |Log message| J[return]
-    F --> L("(Rule-specific)query post-processing")
+    F --> L("(Rule-specific) query post-processing")
     L --> U(Determine outcome)
     U --> Q[Return outcome]    
 
