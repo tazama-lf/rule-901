@@ -74,8 +74,7 @@ const ruleConfig: RuleConfig = {
     },
     exitConditions: [
       {
-        "subRuleRef": ".x00",
-        "outcome": false,
+        "subRuleRef": ".x00", 
         "reason": "Incoming transaction is unsuccessful"
       }
     ],
@@ -83,20 +82,17 @@ const ruleConfig: RuleConfig = {
       {
         subRuleRef: '.01',
         upperLimit: 2,
-        outcome: false,
         reason: 'The debtor has performed one transaction to date',
       },
       {
         subRuleRef: '.02',
         lowerLimit: 2,
         upperLimit: 4,
-        outcome: true,
         reason: 'The debtor has performed two or three transactions to date',
       },
       {
         subRuleRef: '.03',
         lowerLimit: 4,
-        outcome: true,
         reason: 'The debtor has performed 4 or more transactions to date',
       }
     ]
@@ -108,7 +104,7 @@ beforeAll(async () => {
   ruleRes = {
     id: '901@1.0.0',
     cfg: '1.0.0',
-    result: false,
+    
     subRuleRef: '.00',
     reason: '',
   };
@@ -131,7 +127,7 @@ const determineOutcome = (
           (!band.upperLimit || value < band.upperLimit)
         ) {
           ruleResult.subRuleRef = band.subRuleRef;
-          ruleResult.result = band.outcome;
+          
           ruleResult.reason = band.reason;
           break;
         }
@@ -169,7 +165,7 @@ describe('Happy path', () => {
 
     expect(res).toEqual(
       JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":false,"subRuleRef":".01","reason":"The debtor has performed one transaction to date"}',
+        '{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".01","reason":"The debtor has performed one transaction to date"}',
       ),
     );
   });
@@ -196,7 +192,7 @@ describe('Happy path', () => {
 
     expect(res).toEqual(
       JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":true,"subRuleRef":".02","reason":"The debtor has performed two or three transactions to date"}',
+        '{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".02","reason":"The debtor has performed two or three transactions to date"}',
       ),
     );
   });
@@ -223,7 +219,7 @@ describe('Happy path', () => {
 
     expect(res).toEqual(
       JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":true,"subRuleRef":".02","reason":"The debtor has performed two or three transactions to date"}',
+        '{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".02","reason":"The debtor has performed two or three transactions to date"}',
       ),
     );
   });
@@ -250,7 +246,7 @@ describe('Happy path', () => {
 
     expect(res).toEqual(
       JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":true,"subRuleRef":".03","reason":"The debtor has performed 4 or more transactions to date"}',
+        '{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".03","reason":"The debtor has performed 4 or more transactions to date"}',
       ),
     );
   });
@@ -277,7 +273,7 @@ describe('Exit conditions', () => {
 
     expect(res).toEqual(
       JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":false,"subRuleRef":".x00","reason":"Incoming transaction is unsuccessful"}',
+        '{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".x00","reason":"Incoming transaction is unsuccessful"}',
       ),
     );
   });
