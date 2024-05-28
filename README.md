@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Rule 901 Documentation
 
 - [Overview](#overview)
@@ -131,6 +132,4 @@ To publish the Rule library, you need to set up a continuous integration (CI) wo
 - Adjust the `npm run build` command as per your project setup.
 - Review and customize the workflow to suit your specific requirements and project structure.
 
-This workflow automates the process of building and publishing the Rule library whenever changes are pushed to the `main` branch, ensuring that the latest version is always available to consumers.
-
-  
+This workflow automates the process of building and publishing the Rule library whenever changes are pushed to the `main` branch, ensuring that the latest version is always available to consumers.  
