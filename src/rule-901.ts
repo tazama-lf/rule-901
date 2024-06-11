@@ -1,88 +1,50 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  aql,
-  type DatabaseManagerInstance,
-  type LoggerService,
-  type ManagerConfig,
-} from '@frmscoe/frms-coe-lib';
-import {
-  type OutcomeResult,
-  type RuleConfig,
-  type RuleRequest,
-  type RuleResult,
-} from '@frmscoe/frms-coe-lib/lib/interfaces';
+import { aql, type DatabaseManagerInstance, type LoggerService, type ManagerConfig } from '@frmscoe/frms-coe-lib';
+import { type OutcomeResult, type RuleConfig, type RuleRequest, type RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { unwrap } from '@frmscoe/frms-coe-lib/lib/helpers/unwrap';
 
 export async function handleTransaction(
   req: RuleRequest,
-  determineOutcome: (
-    value: number,
-    ruleConfig: RuleConfig,
-    ruleResult: RuleResult,
-  ) => RuleResult,
+  determineOutcome: (value: number, ruleConfig: RuleConfig, ruleResult: RuleResult) => RuleResult,
   ruleRes: RuleResult,
   loggerService: LoggerService,
   ruleConfig: RuleConfig,
   databaseManager: DatabaseManagerInstance<ManagerConfig>,
 ): Promise<RuleResult> {
-
   const context = `Rule-${ruleConfig?.id ? ruleConfig.id : '<unresolved>'} handleTransaction()`;
-  const msgId = req.transaction.FIToFIPmtSts.GrpHdr.MsgId
+  const msgId = req.transaction.FIToFIPmtSts.GrpHdr.MsgId;
 
-  loggerService.trace(
-    'Start - handle transaction',
-    context,
-    msgId,
-  );
+  loggerService.trace('Start - handle transaction', context, msgId);
 
   // Throw errors early if something we know we need is not provided - Guard Pattern
-  if (!ruleConfig?.config?.bands || !ruleConfig.config.bands.length)
+  if (!ruleConfig?.config?.bands || !ruleConfig.config.bands.length) {
     throw new Error('Invalid config provided - bands not provided or empty');
-  if (!ruleConfig.config.exitConditions)
-    throw new Error('Invalid config provided - exitConditions not provided');
-  if (!ruleConfig.config.parameters)
-    throw new Error('Invalid config provided - parameters not provided');
-  if (!ruleConfig.config.parameters.maxQueryRange)
-    throw new Error(
-      'Invalid config provided - maxQueryRange parameter not provided',
-    );
-  if (!req.DataCache?.dbtrAcctId)
-    throw new Error('Data Cache does not have required dbtrAcctId');
+  }
+  if (!ruleConfig.config.exitConditions) throw new Error('Invalid config provided - exitConditions not provided');
+  if (!ruleConfig.config.parameters) throw new Error('Invalid config provided - parameters not provided');
+  if (!ruleConfig.config.parameters.maxQueryRange) throw new Error('Invalid config provided - maxQueryRange parameter not provided');
+  if (!req.DataCache?.dbtrAcctId) throw new Error('Data Cache does not have required dbtrAcctId');
 
   // Step 1: Early exit conditions
 
-  loggerService.trace(
-    'Step 1 - Early exit conditions',
-    context,
-    msgId,
-  );
+  loggerService.trace('Step 1 - Early exit conditions', context, msgId);
 
-  const UnsuccessfulTransaction = ruleConfig.config.exitConditions.find(
-    (b: OutcomeResult) => b.subRuleRef === '.x00',
-  );
+  const UnsuccessfulTransaction = ruleConfig.config.exitConditions.find((b: OutcomeResult) => b.subRuleRef === '.x00');
 
   if (req.transaction.FIToFIPmtSts.TxInfAndSts.TxSts !== 'ACCC') {
-    if (UnsuccessfulTransaction === undefined)
-      throw new Error(
-        'Unsuccessful transaction and no exit condition in config',
-      );
+    if (UnsuccessfulTransaction === undefined) throw new Error('Unsuccessful transaction and no exit condition in config');
 
     return {
       ...ruleRes,
       reason: UnsuccessfulTransaction.reason,
       subRuleRef: UnsuccessfulTransaction.subRuleRef,
-      
     };
   }
 
-  // Step 2: Query Setup 
+  // Step 2: Query Setup
 
-  loggerService.trace(
-    'Step 2 - Query setup',
-    context,
-    msgId,
-  );
+  loggerService.trace('Step 2 - Query setup', context, msgId);
 
   const currentPacs002TimeFrame = req.transaction.FIToFIPmtSts.GrpHdr.CreDtTm;
   const debtorAccountId = `accounts/${req.DataCache.dbtrAcctId}`;
@@ -98,26 +60,17 @@ export async function handleTransaction(
     COLLECT WITH COUNT INTO length
   RETURN length`;
 
-  // Step 3: Query Execution 
+  // Step 3: Query Execution
 
-  loggerService.trace(
-    'Step 3 - Query execution',
-    context,
-    msgId,
-  );
+  loggerService.trace('Step 3 - Query execution', context, msgId);
 
-  const numberOfRecentTransactions = await (
-    await databaseManager._pseudonymsDb.query(queryString)
-  ).batches.all();
+  const numberOfRecentTransactions = await (await databaseManager._pseudonymsDb.query(queryString)).batches.all();
 
   // Step 4: Query post-processing
 
-  loggerService.trace(
-    'Step 4 - Query post-processing',
-    context,
-    msgId,
-  );
+  loggerService.trace('Step 4 - Query post-processing', context, msgId);
 
+  /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
   const count = unwrap(numberOfRecentTransactions);
 
   if (count == null) {
@@ -126,18 +79,12 @@ export async function handleTransaction(
   }
 
   if (typeof count !== 'number') {
-    throw new Error(
-      'Data error: query result type mismatch - expected a number',
-    );
+    throw new Error('Data error: query result type mismatch - expected a number');
   }
 
   // Return control to the rule-executer for rule result calculation
 
-  loggerService.trace(
-    'End - handle transaction',
-    context,
-    msgId,
-  );
+  loggerService.trace('End - handle transaction', context, msgId);
 
   return determineOutcome(count, ruleConfig, ruleRes);
 }
