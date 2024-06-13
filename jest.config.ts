@@ -26,10 +26,7 @@ const config: Config.InitialOptions = {
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   // collectCoverageFrom: ['src/**/*.{ts,js}', '!src/**/*.d.ts'],
-  collectCoverageFrom: [
-    'src/services/logic.service.ts',
-    'src/classes/execute-request.ts',
-  ],
+  collectCoverageFrom: ['src/services/logic.service.ts', 'src/classes/execute-request.ts'],
 
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/coverage/',
