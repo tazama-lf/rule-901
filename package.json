@@ -3,6 +3,12 @@
   "version": "2.0.0-rc.1",
   "description": "Rule 901 is to calculate the number of transactions the debtor has made over a period",
   "main": "index.ts",
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "@frmscoe:registry": "https://npm.pkg.github.com/"
+  },
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "clean": "npx rimraf lib node_modules coverage package-lock.json",
@@ -14,14 +20,14 @@
     "lint:eslint-unused": "eslint --report-unused-disable-directives \"**/*.ts\"",
     "lint:eslint-no-inline": "eslint --no-inline-config \"**/*.ts\"",
     "lint:prettier": "prettier --check \"**/*.ts\"",
-    "test": "jest --config=jest.config.ts --passWithNoTests --runInBand --detectOpenHandles --forceExit"
+    "dry": "npm publish --dry-run",
+    "prepare": "husky",
+    "test": "jest --config=jest.config.ts --passWithNoTests --runInBand --detectOpenHandles --forceExit",
+    "test:watch": "jest --config=jest.config.ts --watch"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/frmscoe/rule-901.git"
-  },
-  "publishConfig": {
-    "@frmscoe:registry": "https://npm.pkg.github.com/"
   },
   "keywords": [
     "rule-091"
