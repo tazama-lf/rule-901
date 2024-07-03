@@ -39,7 +39,7 @@
   },
   "homepage": "https://github.com/frmscoe/rule-901#readme",
   "dependencies": {
-    "@frmscoe/frms-coe-lib": "4.0.0-rc.5",
+    "@frmscoe/frms-coe-lib": "4.0.0-rc.10",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
