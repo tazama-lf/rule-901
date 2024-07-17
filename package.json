@@ -1,6 +1,6 @@
 {
   "name": "@frmscoe/rule-901",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0",
   "description": "Rule 901 is to calculate the number of transactions the debtor has made over a period",
   "main": "index.ts",
   "files": [
@@ -39,7 +39,7 @@
   },
   "homepage": "https://github.com/frmscoe/rule-901#readme",
   "dependencies": {
-    "@frmscoe/frms-coe-lib": "4.0.0-rc.10",
+    "@frmscoe/frms-coe-lib": "next",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
