@@ -1,18 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { handleTransaction } from '../../src';
-import {
-  type DatabaseManagerInstance,
-  LoggerService,
-  CreateDatabaseManager,
-} from '@frmscoe/frms-coe-lib';
-import {
-  type Band,
-  type DataCache,
-  type RuleConfig,
-  type RuleRequest,
-  type RuleResult,
-} from '@frmscoe/frms-coe-lib/lib/interfaces';
+import { type DatabaseManagerInstance, LoggerService, CreateDatabaseManager } from '@frmscoe/frms-coe-lib';
+import { type Band, type DataCache, type RuleConfig, type RuleRequest, type RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
 
 jest.mock('@frmscoe/frms-coe-lib', () => {
   const original = jest.requireActual('@frmscoe/frms-coe-lib');
@@ -42,9 +32,9 @@ const getMockRequest = (): RuleRequest => {
       evtId: 'eventId',
       amt: {
         amt: 1234.56,
-        ccy: 'XTS'
+        ccy: 'XTS',
       },
-      creDtTm: `${new Date(Date.now() - 60 * 1000).toISOString()}`
+      creDtTm: `${new Date(Date.now() - 60 * 1000).toISOString()}`,
     },
   };
   return quote as RuleRequest;
@@ -74,33 +64,29 @@ const ruleConfig: RuleConfig = {
     },
     exitConditions: [
       {
-        "subRuleRef": ".x00",
-        "outcome": false,
-        "reason": "Incoming transaction is unsuccessful"
-      }
+        subRuleRef: '.x00',
+        reason: 'Incoming transaction is unsuccessful',
+      },
     ],
     bands: [
       {
         subRuleRef: '.01',
         upperLimit: 2,
-        outcome: false,
         reason: 'The debtor has performed one transaction to date',
       },
       {
         subRuleRef: '.02',
         lowerLimit: 2,
         upperLimit: 4,
-        outcome: true,
         reason: 'The debtor has performed two or three transactions to date',
       },
       {
         subRuleRef: '.03',
         lowerLimit: 4,
-        outcome: true,
         reason: 'The debtor has performed 4 or more transactions to date',
-      }
-    ]
-  }
+      },
+    ],
+  },
 };
 
 beforeAll(async () => {
@@ -108,7 +94,7 @@ beforeAll(async () => {
   ruleRes = {
     id: '901@1.0.0',
     cfg: '1.0.0',
-    result: false,
+
     subRuleRef: '.00',
     reason: '',
   };
@@ -118,28 +104,18 @@ afterAll(() => {
   databaseManager.quit();
 });
 
-const determineOutcome = (
-  value: number,
-  ruleConfig: RuleConfig,
-  ruleResult: RuleResult,
-): RuleResult => {
+const determineOutcome = (value: number, ruleConfig: RuleConfig, ruleResult: RuleResult): RuleResult => {
   if (value != null) {
     if (ruleConfig.config.bands)
       for (const band of ruleConfig.config.bands) {
-        if (
-          (!band.lowerLimit || value >= band.lowerLimit) &&
-          (!band.upperLimit || value < band.upperLimit)
-        ) {
+        if ((!band.lowerLimit || value >= band.lowerLimit) && (!band.upperLimit || value < band.upperLimit)) {
           ruleResult.subRuleRef = band.subRuleRef;
-          ruleResult.result = band.outcome;
+
           ruleResult.reason = band.reason;
           break;
         }
       }
-  } else
-    throw new Error(
-      'Value provided undefined, so cannot determine rule outcome',
-    );
+  } else throw new Error('Value provided undefined, so cannot determine rule outcome');
   return ruleResult;
 };
 let req: RuleRequest;
@@ -158,19 +134,10 @@ describe('Happy path', () => {
     });
     jest.spyOn(databaseManager._pseudonymsDb, 'query');
 
-    const res = await handleTransaction(
-      req,
-      determineOutcome,
-      ruleRes,
-      loggerService,
-      ruleConfig,
-      databaseManager,
-    );
+    const res = await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
 
     expect(res).toEqual(
-      JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":false,"subRuleRef":".01","reason":"The debtor has performed one transaction to date"}',
-      ),
+      JSON.parse('{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".01","reason":"The debtor has performed one transaction to date"}'),
     );
   });
 
@@ -185,18 +152,11 @@ describe('Happy path', () => {
     });
     jest.spyOn(databaseManager._pseudonymsDb, 'query');
 
-    const res = await handleTransaction(
-      req,
-      determineOutcome,
-      ruleRes,
-      loggerService,
-      ruleConfig,
-      databaseManager,
-    );
+    const res = await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
 
     expect(res).toEqual(
       JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":true,"subRuleRef":".02","reason":"The debtor has performed two or three transactions to date"}',
+        '{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".02","reason":"The debtor has performed two or three transactions to date"}',
       ),
     );
   });
@@ -212,18 +172,11 @@ describe('Happy path', () => {
     });
     jest.spyOn(databaseManager._pseudonymsDb, 'query');
 
-    const res = await handleTransaction(
-      req,
-      determineOutcome,
-      ruleRes,
-      loggerService,
-      ruleConfig,
-      databaseManager,
-    );
+    const res = await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
 
     expect(res).toEqual(
       JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":true,"subRuleRef":".02","reason":"The debtor has performed two or three transactions to date"}',
+        '{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".02","reason":"The debtor has performed two or three transactions to date"}',
       ),
     );
   });
@@ -239,58 +192,33 @@ describe('Happy path', () => {
     });
     jest.spyOn(databaseManager._pseudonymsDb, 'query');
 
-    const res = await handleTransaction(
-      req,
-      determineOutcome,
-      ruleRes,
-      loggerService,
-      ruleConfig,
-      databaseManager,
-    );
+    const res = await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
 
     expect(res).toEqual(
-      JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":true,"subRuleRef":".03","reason":"The debtor has performed 4 or more transactions to date"}',
-      ),
+      JSON.parse('{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".03","reason":"The debtor has performed 4 or more transactions to date"}'),
     );
   });
-
-
 });
 
 describe('Exit conditions', () => {
-
   test('Should respond with .x00: Incoming transaction is unsuccessful', async () => {
     const mockQueryFn = jest.fn();
 
     const objClone = (req: Object) => JSON.parse(JSON.stringify(req));
     const newReq: RuleRequest = objClone(req);
     newReq.transaction.FIToFIPmtSts.TxInfAndSts.TxSts = 'something else';
-    const res = await handleTransaction(
-      newReq,
-      determineOutcome,
-      ruleRes,
-      loggerService,
-      ruleConfig,
-      databaseManager,
-    );
+    const res = await handleTransaction(newReq, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
 
     expect(res).toEqual(
-      JSON.parse(
-        '{"id":"901@1.0.0", "cfg":"1.0.0","result":false,"subRuleRef":".x00","reason":"Incoming transaction is unsuccessful"}',
-      ),
+      JSON.parse('{"id":"901@1.0.0", "cfg":"1.0.0","subRuleRef":".x00","reason":"Incoming transaction is unsuccessful"}'),
     );
   });
-
 });
 
 describe('Error conditions', () => {
-
   test('Unsuccessful transaction and no exit condition', async () => {
     const mockQueryFn = jest.fn();
-    const mockBatchesAllFn = jest
-      .fn()
-      .mockResolvedValue([[{ currentAmount: 14, highestAmount: 15 }]]);
+    const mockBatchesAllFn = jest.fn().mockResolvedValue([[{ currentAmount: 14, highestAmount: 15 }]]);
     databaseManager._pseudonymsDb.query = mockQueryFn.mockResolvedValue({
       batches: {
         all: mockBatchesAllFn,
@@ -303,18 +231,9 @@ describe('Error conditions', () => {
     const newConfig: RuleConfig = objClone(ruleConfig);
     newConfig.config.exitConditions![0].subRuleRef = 'something';
     try {
-      await handleTransaction(
-        newReq,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        newConfig,
-        databaseManager,
-      );
+      await handleTransaction(newReq, determineOutcome, ruleRes, loggerService, newConfig, databaseManager);
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Unsuccessful transaction and no exit condition in config',
-      );
+      expect((error as Error).message).toBe('Unsuccessful transaction and no exit condition in config');
     }
   });
 
@@ -330,18 +249,9 @@ describe('Error conditions', () => {
     jest.spyOn(databaseManager._pseudonymsDb, 'query');
 
     try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        ruleConfig,
-        databaseManager,
-      );
+      await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Data error: irretrievable transaction history',
-      );
+      expect((error as Error).message).toBe('Data error: irretrievable transaction history');
     }
   });
 
@@ -357,18 +267,9 @@ describe('Error conditions', () => {
     jest.spyOn(databaseManager._pseudonymsDb, 'query');
 
     try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        ruleConfig,
-        databaseManager,
-      );
+      await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Data error: query result type mismatch - expected a number',
-      );
+      expect((error as Error).message).toBe('Data error: query result type mismatch - expected a number');
     }
   });
 
@@ -384,18 +285,9 @@ describe('Error conditions', () => {
     jest.spyOn(databaseManager._pseudonymsDb, 'query');
 
     try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        ruleConfig,
-        databaseManager,
-      );
+      await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Data error: irretrievable transaction history',
-      );
+      expect((error as Error).message).toBe('Data error: irretrievable transaction history');
     }
   });
 
@@ -420,9 +312,7 @@ describe('Error conditions', () => {
         databaseManager,
       );
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Data Cache does not have required dbtrAcctId',
-      );
+      expect((error as Error).message).toBe('Data Cache does not have required dbtrAcctId');
     }
 
     try {
@@ -435,9 +325,7 @@ describe('Error conditions', () => {
         databaseManager,
       );
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Data Cache does not have required dbtrAcctId',
-      );
+      expect((error as Error).message).toBe('Data Cache does not have required dbtrAcctId');
     }
   });
 
@@ -465,9 +353,7 @@ describe('Error conditions', () => {
         databaseManager,
       );
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Invalid config provided - parameters not provided',
-      );
+      expect((error as Error).message).toBe('Invalid config provided - parameters not provided');
     }
 
     try {
@@ -483,9 +369,7 @@ describe('Error conditions', () => {
         databaseManager,
       );
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Invalid config provided - maxQueryRange parameter not provided',
-      );
+      expect((error as Error).message).toBe('Invalid config provided - maxQueryRange parameter not provided');
     }
 
     try {
@@ -501,9 +385,7 @@ describe('Error conditions', () => {
         databaseManager,
       );
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Invalid config provided - exitConditions not provided',
-      );
+      expect((error as Error).message).toBe('Invalid config provided - exitConditions not provided');
     }
 
     try {
@@ -519,9 +401,7 @@ describe('Error conditions', () => {
         databaseManager,
       );
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Invalid config provided - bands not provided or empty',
-      );
+      expect((error as Error).message).toBe('Invalid config provided - bands not provided or empty');
     }
 
     try {
@@ -540,24 +420,13 @@ describe('Error conditions', () => {
         databaseManager,
       );
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Invalid config provided - bands not provided or empty',
-      );
+      expect((error as Error).message).toBe('Invalid config provided - bands not provided or empty');
     }
 
     try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        undefined as unknown as RuleConfig,
-        databaseManager,
-      );
+      await handleTransaction(req, determineOutcome, ruleRes, loggerService, undefined as unknown as RuleConfig, databaseManager);
     } catch (error) {
-      expect((error as Error).message).toBe(
-        'Invalid config provided - bands not provided or empty',
-      );
+      expect((error as Error).message).toBe('Invalid config provided - bands not provided or empty');
     }
   });
 });
