@@ -1,6 +1,6 @@
 {
   "name": "@tazama-lf/rule-901",
-  "version": "3.0.0-rc.1",
+  "version": "3.0.0",
   "description": "Rule 901 is to calculate the number of transactions the debtor has made over a period",
   "main": "index.ts",
   "files": [
