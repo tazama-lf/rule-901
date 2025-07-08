@@ -3,3 +3,4 @@
 # Ignore artifacts:
 lib
 coverage
+__tests__

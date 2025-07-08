@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { handleTransaction } from '../../src';
-import { type DatabaseManagerInstance, LoggerService, CreateDatabaseManager } from '@tazama-lf/frms-coe-lib';
+import { type DatabaseManagerInstance, LoggerService, CreateDatabaseManager, ManagerConfig } from '@tazama-lf/frms-coe-lib';
 import { type Band, type DataCache, type RuleConfig, type RuleRequest, type RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { RuleExecutorConfig } from '../../src/rule-901';
 
 jest.mock('@tazama-lf/frms-coe-lib', () => {
   const original = jest.requireActual('@tazama-lf/frms-coe-lib');
@@ -40,7 +41,7 @@ const getMockRequest = (): RuleRequest => {
   return quote as RuleRequest;
 };
 
-const databaseManagerConfig = {
+const databaseManagerConfig: RuleExecutorConfig = {
   pseudonyms: {
     certPath: '',
     databaseName: '',
@@ -48,9 +49,27 @@ const databaseManagerConfig = {
     password: '',
     url: '',
   },
+  transactionHistory: {
+    certPath: '',
+    databaseName: '',
+    user: '',
+    password: '',
+    url: '',
+  },
+  configuration: {
+    certPath: '',
+    databaseName: '',
+    user: '',
+    password: '',
+    url: '',
+  },
+  localCacheConfig: {
+    localCacheEnabled: false,
+    localCacheTTL: 0,
+  },
 };
 
-let databaseManager: DatabaseManagerInstance<typeof databaseManagerConfig>;
+let databaseManager: DatabaseManagerInstance<RuleExecutorConfig>;
 let ruleRes: RuleResult;
 const loggerService: LoggerService = new LoggerService({ maxCPU: 1, functionName: 'rule-901Test', nodeEnv: 'test' });
 
