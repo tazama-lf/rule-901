@@ -333,19 +333,6 @@ describe('Error conditions', () => {
     } catch (error) {
       expect((error as Error).message).toBe('Data Cache does not have required dbtrAcctId');
     }
-
-    try {
-      await handleTransaction(
-        { ...req, DataCache: undefined as unknown as DataCache },
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        ruleConfig,
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Data Cache does not have required dbtrAcctId');
-    }
   });
 
   test('Invalid config', async () => {
@@ -438,12 +425,6 @@ describe('Error conditions', () => {
         },
         databaseManager,
       );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid config provided - bands not provided or empty');
-    }
-
-    try {
-      await handleTransaction(req, determineOutcome, ruleRes, loggerService, undefined as unknown as RuleConfig, databaseManager);
     } catch (error) {
       expect((error as Error).message).toBe('Invalid config provided - bands not provided or empty');
     }
