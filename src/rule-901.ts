@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { aql, type DatabaseManagerInstance, type LoggerService, type ManagerConfig } from '@tazama-lf/frms-coe-lib';
-import { type OutcomeResult, type RuleConfig, type RuleRequest, type RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import type { OutcomeResult, RuleConfig, RuleRequest, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import { unwrap } from '@tazama-lf/frms-coe-lib/lib/helpers/unwrap';
+
+export type RuleExecutorConfig = ManagerConfig &
+  Required<Pick<ManagerConfig, 'transactionHistory' | 'pseudonyms' | 'configuration' | 'localCacheConfig'>>;
 
 export async function handleTransaction(
   req: RuleRequest,
@@ -10,21 +13,21 @@ export async function handleTransaction(
   ruleRes: RuleResult,
   loggerService: LoggerService,
   ruleConfig: RuleConfig,
-  databaseManager: DatabaseManagerInstance<ManagerConfig>,
+  databaseManager: DatabaseManagerInstance<RuleExecutorConfig>,
 ): Promise<RuleResult> {
-  const context = `Rule-${ruleConfig?.id ? ruleConfig.id : '<unresolved>'} handleTransaction()`;
+  const context = `Rule-${ruleConfig.id ? ruleConfig.id : '<unresolved>'} handleTransaction()`;
   const msgId = req.transaction.FIToFIPmtSts.GrpHdr.MsgId;
 
   loggerService.trace('Start - handle transaction', context, msgId);
 
   // Throw errors early if something we know we need is not provided - Guard Pattern
-  if (!ruleConfig?.config?.bands || !ruleConfig.config.bands.length) {
+  if (!ruleConfig.config.bands?.length) {
     throw new Error('Invalid config provided - bands not provided or empty');
   }
   if (!ruleConfig.config.exitConditions) throw new Error('Invalid config provided - exitConditions not provided');
   if (!ruleConfig.config.parameters) throw new Error('Invalid config provided - parameters not provided');
   if (!ruleConfig.config.parameters.maxQueryRange) throw new Error('Invalid config provided - maxQueryRange parameter not provided');
-  if (!req.DataCache?.dbtrAcctId) throw new Error('Data Cache does not have required dbtrAcctId');
+  if (!req.DataCache.dbtrAcctId) throw new Error('Data Cache does not have required dbtrAcctId');
 
   // Step 1: Early exit conditions
 
@@ -64,13 +67,12 @@ export async function handleTransaction(
 
   loggerService.trace('Step 3 - Query execution', context, msgId);
 
-  const numberOfRecentTransactions = await (await databaseManager._pseudonymsDb.query(queryString)).batches.all();
+  const numberOfRecentTransactions = (await (await databaseManager._pseudonymsDb.query(queryString)).batches.all()) as unknown[][];
 
   // Step 4: Query post-processing
 
   loggerService.trace('Step 4 - Query post-processing', context, msgId);
 
-  /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
   const count = unwrap(numberOfRecentTransactions);
 
   if (count == null) {
