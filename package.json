@@ -41,7 +41,7 @@
   },
   "homepage": "https://github.com/tazama-lf/rule-901#readme",
   "dependencies": {
-    "@tazama-lf/frms-coe-lib": "6.0.0-rc.3",
+    "@tazama-lf/frms-coe-lib": "6.0.0-rc.5",
     "node-cache": "^5.1.2"
   },
   "devDependencies": {

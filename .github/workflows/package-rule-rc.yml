@@ -10,6 +10,7 @@ on:
 
 jobs:
   automate-rule-executer:
+    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GH_TOKEN_LIB }}
