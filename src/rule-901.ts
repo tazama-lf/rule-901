@@ -2,9 +2,15 @@
 
 import type { DatabaseManagerInstance, LoggerService, ManagerConfig } from '@tazama-lf/frms-coe-lib';
 import type { OutcomeResult, RuleConfig, RuleRequest, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import ruleConfigSchema from './schemas/ruleConfig.json';
 
 export type RuleExecutorConfig = ManagerConfig &
   Required<Pick<ManagerConfig, 'rawHistory' | 'eventHistory' | 'configuration' | 'localCacheConfig'>>;
+
+export function getRuleConfigSchema(): Record<string, unknown> {
+  return ruleConfigSchema;
+}
+
 interface CountRow {
   length: number;
 }

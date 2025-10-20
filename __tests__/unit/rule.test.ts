@@ -3,7 +3,7 @@
 import { type DatabaseManagerInstance, LoggerService, CreateDatabaseManager } from '@tazama-lf/frms-coe-lib';
 import { type Band, type RuleConfig, type RuleRequest, type RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import { CreateStorageManager } from '@tazama-lf/frms-coe-lib/lib/services/dbManager';
-import { handleTransaction } from '../../src';
+import { handleTransaction, getRuleConfigSchema } from '../../src';
 import { RuleExecutorConfig } from '../../src/rule-901';
 
 jest.mock('@tazama-lf/frms-coe-lib', () => {
@@ -104,13 +104,13 @@ const ruleConfig: RuleConfig = {
       {
         subRuleRef: '.02',
         lowerLimit: 2,
-        upperLimit: 4,
-        reason: 'The debtor has performed two or three transactions to date',
+        upperLimit: 3,
+        reason: 'The debtor has performed two transactions to date',
       },
       {
         subRuleRef: '.03',
-        lowerLimit: 4,
-        reason: 'The debtor has performed 4 or more transactions to date',
+        lowerLimit: 3,
+        reason: 'The debtor has performed three or more transactions to date',
       },
     ],
   },
@@ -125,6 +125,7 @@ beforeAll(async () => {
     cfg: '1.0.0',
     tenantId: 'DEFAULT',
     subRuleRef: '.00',
+    indpdntVarbl: 0,
     reason: '',
   };
 });
@@ -134,6 +135,7 @@ afterAll(() => {
 
 const determineOutcome = (value: number, ruleConfig: RuleConfig, ruleResult: RuleResult): RuleResult => {
   if (value != null) {
+    ruleResult.indpdntVarbl = value;
     if (ruleConfig.config.bands)
       for (const band of ruleConfig.config.bands) {
         if ((!band.lowerLimit || value >= band.lowerLimit) && (!band.upperLimit || value < band.upperLimit)) {
@@ -146,9 +148,20 @@ const determineOutcome = (value: number, ruleConfig: RuleConfig, ruleResult: Rul
   } else throw new Error('Value provided undefined, so cannot determine rule outcome');
   return ruleResult;
 };
+
 let req: RuleRequest;
+
 beforeEach(() => {
   req = getMockRequest();
+
+  ruleRes = {
+    id: 'DEFAULT-901@1.0.0',
+    cfg: '1.0.0',
+    tenantId: 'DEFAULT',
+    subRuleRef: '.00',
+    indpdntVarbl: 0,
+    reason: '',
+  };
 });
 
 describe('Happy path', () => {
@@ -160,11 +173,11 @@ describe('Happy path', () => {
     const res = await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
 
     expect(res).toEqual(
-      JSON.parse('{"id":"DEFAULT-901@1.0.0", "cfg":"1.0.0","subRuleRef":".01","reason":"The debtor has performed one transaction to date", "tenantId":"DEFAULT"}'),
+      JSON.parse('{"id":"DEFAULT-901@1.0.0", "cfg":"1.0.0","subRuleRef":".01","indpdntVarbl":1,"reason":"The debtor has performed one transaction to date", "tenantId":"DEFAULT"}'),
     );
   });
 
-  test('Should respond with .02: The debtor has performed two or three transactions to date', async () => {
+  test('Should respond with .02: The debtor has performed two transactions to date', async () => {
     const mockQueryFn = jest.fn();
     databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({ rows: [{ length: 2 }]});
     jest.spyOn(databaseManager._eventHistory, 'query');
@@ -173,34 +186,20 @@ describe('Happy path', () => {
 
     expect(res).toEqual(
       JSON.parse(
-        '{"id":"DEFAULT-901@1.0.0", "cfg":"1.0.0","subRuleRef":".02","reason":"The debtor has performed two or three transactions to date", "tenantId":"DEFAULT"}',
+        '{"id":"DEFAULT-901@1.0.0", "cfg":"1.0.0","subRuleRef":".02","indpdntVarbl":2,"reason":"The debtor has performed two transactions to date", "tenantId":"DEFAULT"}',
       ),
     );
   });
 
-  test('Should respond with .02: The debtor has performed two or three transactions to date', async () => {
+  test('Should respond with .03: The debtor has performed three or more transactions to date', async () => {
     const mockQueryFn = jest.fn();
-    databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({ rows: [{ length: 2 }]});
+    databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({ rows: [{ length: 3 }]});
     jest.spyOn(databaseManager._eventHistory, 'query');
 
     const res = await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
 
     expect(res).toEqual(
-      JSON.parse(
-        '{"id":"DEFAULT-901@1.0.0", "cfg":"1.0.0","subRuleRef":".02","reason":"The debtor has performed two or three transactions to date", "tenantId":"DEFAULT"}',
-      ),
-    );
-  });
-
-  test('Should respond with .03: The debtor has performed 4 or more transactions to date', async () => {
-    const mockQueryFn = jest.fn();
-    databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({ rows: [{ length: 4 }]});
-    jest.spyOn(databaseManager._eventHistory, 'query');
-
-    const res = await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
-
-    expect(res).toEqual(
-      JSON.parse('{"id":"DEFAULT-901@1.0.0", "cfg":"1.0.0","subRuleRef":".03","reason":"The debtor has performed 4 or more transactions to date", "tenantId":"DEFAULT"}'),
+      JSON.parse('{"id":"DEFAULT-901@1.0.0", "cfg":"1.0.0","subRuleRef":".03","indpdntVarbl":3,"reason":"The debtor has performed three or more transactions to date", "tenantId":"DEFAULT"}'),
     );
   });
 });
@@ -213,7 +212,7 @@ describe('Exit conditions', () => {
     const res = await handleTransaction(newReq, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
 
     expect(res).toEqual(
-      JSON.parse('{"id":"DEFAULT-901@1.0.0", "cfg":"1.0.0","subRuleRef":".x00","reason":"Incoming transaction is unsuccessful", "tenantId":"DEFAULT"}'),
+      JSON.parse('{"id":"DEFAULT-901@1.0.0", "cfg":"1.0.0","subRuleRef":".x00","indpdntVarbl":0,"reason":"Incoming transaction is unsuccessful", "tenantId":"DEFAULT"}'),
     );
   });
 });
@@ -390,5 +389,55 @@ describe('Error conditions', () => {
     } catch (error) {
       expect((error as Error).message).toBe('Invalid ruleConfig provided - bands not provided or empty');
     }
+  });
+});
+
+describe('getRuleConfigSchema', () => {
+  it('should return a valid schema object', () => {
+    const schema = getRuleConfigSchema();
+    
+    expect(schema).toBeDefined();
+    expect(typeof schema).toBe('object');
+    expect(schema).not.toBeNull();
+  });
+
+  it('should return schema with required root properties', () => {
+    const schema = getRuleConfigSchema();
+    
+    expect(schema.type).toBe('object');
+    expect(schema.properties).toBeDefined();
+    expect(schema.required).toContain('id');
+    expect(schema.required).toContain('cfg');
+    expect(schema.required).toContain('config');
+    expect(schema.required).toContain('tenantId');
+  });
+
+  it('should have config properties with correct structure', () => {
+    const schema = getRuleConfigSchema();
+    
+    expect(schema.properties.config).toBeDefined();
+    expect(schema.properties.config.properties).toBeDefined();
+    expect(schema.properties.config.properties.parameters).toBeDefined();
+    expect(schema.properties.config.properties.exitConditions).toBeDefined();
+    expect(schema.properties.config.properties.bands).toBeDefined();
+  });
+
+  it('should enforce specific exitConditions schema', () => {
+    const schema = getRuleConfigSchema();
+    const exitConditions = schema.properties.config.properties.exitConditions;
+    
+    expect(exitConditions.minItems).toBe(1);
+    expect(exitConditions.maxItems).toBe(1);
+    expect(exitConditions.items.properties.subRuleRef.enum).toContain('.x00');
+    expect(exitConditions.items.properties.reason.enum).toContain('Incoming transaction is unsuccessful');
+  });
+
+  it('should enforce minimum bands requirement', () => {
+    const schema = getRuleConfigSchema();
+    const bands = schema.properties.config.properties.bands;
+    
+    expect(bands.minItems).toBe(2);
+    expect(bands.items.required).toContain('subRuleRef');
+    expect(bands.items.required).toContain('reason');
   });
 });
