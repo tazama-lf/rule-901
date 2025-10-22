@@ -1,0 +1,49 @@
+name: Bill of Materials Check
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+jobs:
+  check-bom:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Required Files and Folders
+        run: |
+          REQUIRED_FILES=(.github LICENSE package.json README .husky .npmrc __tests__)
+          MISSING_FILES=()
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -e "$file" ]; then
+              MISSING_FILES+=("$file")
+            fi
+          done
+          if [ ${#MISSING_FILES[@]} -ne 0 ]; then
+            echo "❌ Missing required files/folders: ${MISSING_FILES[*]}"
+            exit 1
+          else
+            echo "✅ All required files/folders present."
+          fi
+
+      - name: Check for Unwanted Files
+        run: |
+          UNWANTED_FILES=(node_modules)
+          FORBIDDEN_FILES=()
+          for file in "${UNWANTED_FILES[@]}"; do
+            if [ -e "$file" ]; then
+              FORBIDDEN_FILES+=("$file")
+            fi
+          done
+          if [ ${#FORBIDDEN_FILES[@]} -ne 0 ]; then
+            echo "❌ Found unwanted files/folders: ${FORBIDDEN_FILES[*]}"
+            exit 1
+          else
+            echo "✅ No unwanted files/folders detected."
+          fi
