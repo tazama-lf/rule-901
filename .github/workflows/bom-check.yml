@@ -18,7 +18,7 @@ jobs:
 
       - name: Check Required Files and Folders
         run: |
-          REQUIRED_FILES=(.github LICENSE package.json README .husky .npmrc __tests__)
+          REQUIRED_FILES=(.github LICENSE package.json README.md .husky .npmrc __tests__)
           MISSING_FILES=()
           for file in "${REQUIRED_FILES[@]}"; do
             if [ ! -e "$file" ]; then
