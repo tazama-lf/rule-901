@@ -10,6 +10,7 @@ on:
 
 jobs:
   automate-rule-executer:
+    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GH_TOKEN_LIB }}
@@ -51,11 +52,11 @@ jobs:
         run: |
           echo "Packaging rule processors into Docker image..."
           cd rule-executer && cat Dockerfile
-          docker build -t tazamaorg/rule-901:2.2.0 .
+          docker build -t tazamaorg/rule-901:3.0.0 .
           echo "Logging into DockerHub..."
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-          docker push tazamaorg/rule-901:2.2.0
-          docker rmi tazamaorg/rule-901:2.2.0
+          docker push tazamaorg/rule-901:3.0.0
+          docker rmi tazamaorg/rule-901:3.0.0
           echo "Docker Image creation and push complete."
 
       # Step 6: Send Slack Notification

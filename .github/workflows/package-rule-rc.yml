@@ -6,10 +6,13 @@ on:
   push:
     branches:
       - dev
+  repository_dispatch:
+    types: [rule-executer-update]  # Matches event-type from dispatch
   workflow_dispatch:
 
 jobs:
   automate-rule-executer:
+    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GH_TOKEN_LIB }}
