@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# This file is managed centrally — do not edit manually.
+# This file is managed centrally - do not edit manually.
 # To change build behaviour, update the reusable workflow in tazama-lf/workflows.
 on:
   push:
