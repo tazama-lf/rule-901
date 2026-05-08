@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { DatabaseManagerInstance, LoggerService, ManagerConfig } from '@tazama-lf/frms-coe-lib';
-import type { OutcomeResult, RuleConfig, RuleRequest, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import type { OutcomeResult, Pacs002, RuleConfig, RuleRequest, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 
 export type RuleExecutorConfig = ManagerConfig &
   Required<Pick<ManagerConfig, 'rawHistory' | 'eventHistory' | 'configuration' | 'localCacheConfig'>>;
@@ -10,7 +10,7 @@ interface CountRow {
 }
 
 export async function handleTransaction(
-  req: RuleRequest,
+  req: RuleRequest<Pacs002>,
   determineOutcome: (value: number, ruleConfig: RuleConfig, ruleResult: RuleResult) => RuleResult,
   ruleRes: RuleResult,
   loggerService: LoggerService,
