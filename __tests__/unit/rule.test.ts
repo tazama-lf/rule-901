@@ -382,6 +382,9 @@ describe('Error conditions', () => {
 
 describe('Unsupported transaction type', () => {
   test('should return early with .err for unrecognised transaction type', async () => {
+    const querySpy = jest.fn();
+    databaseManager._eventHistory.query = querySpy;
+
     const unsupportedReq = {
       ...req,
       transaction: { TxTp: 'unsupported.type.v1', TenantId: 'DEFAULT', someField: 'someValue' } as any,
@@ -389,5 +392,6 @@ describe('Unsupported transaction type', () => {
     const res = await handleTransaction(unsupportedReq, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
     expect(res.subRuleRef).toBe('.err');
     expect(res.reason).toBe('Unsupported transaction type');
+    expect(querySpy).not.toHaveBeenCalled();
   });
 });
