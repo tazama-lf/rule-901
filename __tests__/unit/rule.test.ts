@@ -394,4 +394,22 @@ describe('Unsupported transaction type', () => {
     expect(res.reason).toBe('Unsupported transaction type');
     expect(querySpy).not.toHaveBeenCalled();
   });
+
+  test('should return early with .err for unsupported structured transaction type', async () => {
+    const querySpy = jest.fn();
+    databaseManager._eventHistory.query = querySpy;
+
+    const pacs008Req = {
+      ...req,
+      transaction: {
+        TxTp: 'pacs.008.001.10',
+        TenantId: 'DEFAULT',
+        FIToFICstmrCdtTrf: { GrpHdr: { MsgId: 'test-msg-id' }, CdtTrfTxInf: {} },
+      } as any,
+    };
+    const res = await handleTransaction(pacs008Req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
+    expect(res.subRuleRef).toBe('.err');
+    expect(res.reason).toBe('Unsupported structured transaction type');
+    expect(querySpy).not.toHaveBeenCalled();
+  });
 });

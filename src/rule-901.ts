@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { DatabaseManagerInstance, LoggerService, ManagerConfig } from '@tazama-lf/frms-coe-lib';
-import { isPacs002Transaction } from '@tazama-lf/frms-coe-lib';
+import { isPacs002Transaction, isStructuredTransaction } from '@tazama-lf/frms-coe-lib';
 import type { OutcomeResult, RuleConfig, RuleRequest, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 
 export type RuleExecutorConfig = ManagerConfig &
@@ -20,9 +20,14 @@ export async function handleTransaction(
 ): Promise<RuleResult> {
   const context = `Rule-${ruleConfig.id} handleTransaction()`;
 
-  if (!isPacs002Transaction(req.transaction)) {
+  if (!isStructuredTransaction(req.transaction)) {
     loggerService.error('Unsupported transaction type', new Error('Unsupported transaction type'), context);
     return { ...ruleRes, subRuleRef: '.err', reason: 'Unsupported transaction type' };
+  }
+
+  if (!isPacs002Transaction(req.transaction)) {
+    loggerService.error('Unsupported structured transaction type', new Error('Unsupported structured transaction type'), context);
+    return { ...ruleRes, subRuleRef: '.err', reason: 'Unsupported structured transaction type' };
   }
 
   const msgId = req.transaction.FIToFIPmtSts.GrpHdr.MsgId;
