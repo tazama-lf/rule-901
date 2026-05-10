@@ -4,6 +4,8 @@ import type { DatabaseManagerInstance, LoggerService, ManagerConfig } from '@taz
 import { isPacs002Transaction, isStructuredTransaction } from '@tazama-lf/frms-coe-lib';
 import type { OutcomeResult, RuleConfig, RuleRequest, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 
+export const RULE_ID = '901';
+
 export type RuleExecutorConfig = ManagerConfig &
   Required<Pick<ManagerConfig, 'rawHistory' | 'eventHistory' | 'configuration' | 'localCacheConfig'>>;
 interface CountRow {

@@ -4,8 +4,6 @@ import { baseConfigSchema, baseRuleConfigSchema, BandSchema, OutcomeResultSchema
 import type { RuleConfig } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import { z } from 'zod';
 
-export const RULE_ID = '901';
-
 const rule901ConfigSchema = baseConfigSchema.extend({
   bands: z.array(BandSchema).min(1),
   exitConditions: z.array(OutcomeResultSchema).min(1),

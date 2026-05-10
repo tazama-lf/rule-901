@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { handleTransaction } from './rule-901';
-export { handleTransaction };
-export { RULE_ID, ruleConfigSchema, validateConfig } from './schemas/ruleConfig';
+export { handleTransaction, RULE_ID } from './rule-901';
+export { ruleConfigSchema, validateConfig } from './schemas/ruleConfig';

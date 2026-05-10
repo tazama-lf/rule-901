@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { RULE_ID, ruleConfigSchema, validateConfig } from '../../src/schemas/ruleConfig';
+import { RULE_ID } from '../../src/rule-901';
+import { ruleConfigSchema, validateConfig } from '../../src/schemas/ruleConfig';
 
 const validConfig = {
   id: '901@1.0.0',
