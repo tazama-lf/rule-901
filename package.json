@@ -41,8 +41,8 @@
   },
   "homepage": "https://github.com/tazama-lf/rule-901#readme",
   "dependencies": {
-    "@tazama-lf/frms-coe-lib": "^8.0.0-rc.5",
-    "zod": "^4.4.3"
+    "@tazama-lf/frms-coe-lib": "8.0.0-rc.5",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@eslint-community/eslint-plugin-eslint-comments": "^4.5.0",
