@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { type DatabaseManagerInstance, LoggerService, CreateDatabaseManager } from '@tazama-lf/frms-coe-lib';
-import { type Band, type Pacs002, type RuleConfig, type RuleRequest, type RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { type Pacs002, type RuleConfig, type RuleRequest, type RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import { CreateStorageManager } from '@tazama-lf/frms-coe-lib/lib/services/dbManager';
 import { handleTransaction } from '../../src';
 import { RuleExecutorConfig } from '../../src/rule-901';
@@ -284,100 +284,6 @@ describe('Error conditions', () => {
     }
   });
 
-  test('Invalid config', async () => {
-    const mockQueryFn = jest.fn();
-
-    const mockBatchesAllFn = jest.fn().mockResolvedValue([['abc']]);
-    databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({
-      batches: {
-        all: mockBatchesAllFn,
-      },
-    });
-    jest.spyOn(databaseManager._eventHistory, 'query');
-
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: { ...ruleConfig.config, parameters: undefined },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - parameters not provided');
-    }
-
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: { ...ruleConfig.config, parameters: { '1': 2 } },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - maxQueryRange parameter not provided');
-    }
-
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: { ...ruleConfig.config, exitConditions: undefined },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - exitConditions not provided');
-    }
-
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: { ...ruleConfig.config, bands: [] },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - bands not provided or empty');
-    }
-
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: {
-            ...ruleConfig.config,
-            bands: undefined as unknown as Band[],
-          },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - bands not provided or empty');
-    }
-  });
 });
 
 describe('Unsupported transaction type', () => {

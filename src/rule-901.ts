@@ -34,20 +34,13 @@ export async function handleTransaction(
 
   loggerService.trace('Start - handle transaction', context, msgId);
 
-  // Throw errors early if something we know we need is not provided - Guard Pattern
-  if (!ruleConfig.config.bands?.length) {
-    throw new Error('Invalid ruleConfig provided - bands not provided or empty');
-  }
-  if (!ruleConfig.config.exitConditions) throw new Error('Invalid ruleConfig provided - exitConditions not provided');
-  if (!ruleConfig.config.parameters) throw new Error('Invalid ruleConfig provided - parameters not provided');
-  if (!ruleConfig.config.parameters.maxQueryRange) throw new Error('Invalid ruleConfig provided - maxQueryRange parameter not provided');
   if (!req.DataCache.dbtrAcctId) throw new Error('Data Cache does not have required dbtrAcctId');
 
   // Step 1: Early exit conditions
 
   loggerService.trace('Step 1 - Early exit conditions', context, msgId);
 
-  const UnsuccessfulTransaction = ruleConfig.config.exitConditions.find((b: OutcomeResult) => b.subRuleRef === '.x00');
+  const UnsuccessfulTransaction = ruleConfig.config.exitConditions!.find((b: OutcomeResult) => b.subRuleRef === '.x00');
 
   if (req.transaction.FIToFIPmtSts.TxInfAndSts.TxSts !== 'ACCC') {
     if (UnsuccessfulTransaction === undefined) throw new Error('Unsuccessful transaction and no exit condition in ruleConfig');
@@ -65,7 +58,7 @@ export async function handleTransaction(
 
   const currentPacs002TimeFrame = req.transaction.FIToFIPmtSts.GrpHdr.CreDtTm;
   const debtorAccountId = req.DataCache.dbtrAcctId;
-  const maxQueryRange: number = ruleConfig.config.parameters.maxQueryRange as number;
+  const maxQueryRange: number = ruleConfig.config.parameters!.maxQueryRange as number;
   const tenantId = req.transaction.TenantId;
 
   const values = [debtorAccountId, currentPacs002TimeFrame, maxQueryRange, tenantId];

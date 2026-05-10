@@ -2,3 +2,4 @@
 
 import { handleTransaction } from './rule-901';
 export { handleTransaction };
+export { RULE_ID, ruleConfigSchema, validateConfig } from './schemas/ruleConfig';
