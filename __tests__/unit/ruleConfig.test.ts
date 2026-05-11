@@ -38,6 +38,15 @@ describe('ruleConfigSchema', () => {
     expect(() => ruleConfigSchema.parse({ ...validConfig, config: { ...validConfig.config, exitConditions: [] } })).toThrow();
   });
 
+  it("should reject when exitConditions has no '.x00' entry", () => {
+    expect(() =>
+      ruleConfigSchema.parse({
+        ...validConfig,
+        config: { ...validConfig.config, exitConditions: [{ subRuleRef: '.01', reason: 'Some other condition' }] },
+      }),
+    ).toThrow("exitConditions must include a '.x00' entry");
+  });
+
   it('should reject when exitConditions is absent', () => {
     const { exitConditions: _e, ...configNoExit } = validConfig.config;
     expect(() => ruleConfigSchema.parse({ ...validConfig, config: configNoExit })).toThrow();

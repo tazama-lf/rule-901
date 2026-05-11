@@ -6,7 +6,10 @@ import { z } from 'zod';
 
 const rule901ConfigSchema = baseConfigSchema.extend({
   bands: z.array(BandSchema).min(1),
-  exitConditions: z.array(OutcomeResultSchema).min(1),
+  exitConditions: z
+    .array(OutcomeResultSchema)
+    .min(1)
+    .refine((conditions) => conditions.some((c) => c.subRuleRef === '.x00'), { message: "exitConditions must include a '.x00' entry" }),
   parameters: z.object({
     maxQueryRange: z.number().positive(),
   }),

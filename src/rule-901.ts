@@ -42,11 +42,9 @@ export async function handleTransaction(
 
   loggerService.trace('Step 1 - Early exit conditions', context, msgId);
 
-  const UnsuccessfulTransaction = ruleConfig.config.exitConditions!.find((b: OutcomeResult) => b.subRuleRef === '.x00');
+  const UnsuccessfulTransaction = ruleConfig.config.exitConditions!.find((b: OutcomeResult) => b.subRuleRef === '.x00')!;
 
   if (req.transaction.FIToFIPmtSts.TxInfAndSts.TxSts !== 'ACCC') {
-    if (UnsuccessfulTransaction === undefined) throw new Error('Unsuccessful transaction and no exit condition in ruleConfig');
-
     return {
       ...ruleRes,
       reason: UnsuccessfulTransaction.reason,
