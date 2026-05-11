@@ -44,7 +44,7 @@ describe('ruleConfigSchema', () => {
         ...validConfig,
         config: { ...validConfig.config, exitConditions: [{ subRuleRef: '.01', reason: 'Some other condition' }] },
       }),
-    ).toThrow("exitConditions must include a '.x00' entry");
+    ).toThrow(`exitConditions must include a '.x00' entry`);
   });
 
   it('should reject when exitConditions is absent', () => {
