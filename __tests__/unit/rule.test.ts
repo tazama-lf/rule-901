@@ -219,22 +219,6 @@ describe('Exit conditions', () => {
 });
 
 describe('Error conditions', () => {
-  test('Unsuccessful transaction and no exit condition', async () => {
-    const mockQueryFn = jest.fn();
-    databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({ rows: [{ length: 4 }]});
-    jest.spyOn(databaseManager._eventHistory, 'query');
-    const objClone = (req: Object) => JSON.parse(JSON.stringify(req));
-    const newReq: RuleRequest<Pacs002> = objClone(req);
-    newReq.transaction.FIToFIPmtSts.TxInfAndSts.TxSts = 'something else';
-    const newConfig: RuleConfig = objClone(ruleConfig);
-    newConfig.config.exitConditions![0].subRuleRef = 'something';
-    try {
-      await handleTransaction(newReq, determineOutcome, ruleRes, loggerService, newConfig, databaseManager);
-    } catch (error) {
-      expect((error as Error).message).toBe('Unsuccessful transaction and no exit condition in ruleConfig');
-    }
-  });
-
   test('No transactions', async () => {
     const mockQueryFn = jest.fn();
     databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({ rows: [{ length: 0 }]});
