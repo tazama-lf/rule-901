@@ -1,6 +1,6 @@
 {
   "name": "@tazama-lf/rule-901",
-  "version": "4.0.0-rc.5",
+  "version": "4.0.0-rc.6",
   "description": "Rule 901 is to calculate the number of transactions the debtor has made over a period",
   "main": "index.ts",
   "files": [
@@ -13,6 +13,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "clean": "npx rimraf lib node_modules coverage package-lock.json",
+    "publish:dev": "npm publish --tag rc",
     "fix": "npm run fix:prettier && npm run fix:eslint",
     "fix:eslint": "eslint --fix",
     "fix:prettier": "prettier --write \"**/*.ts\"",
@@ -41,7 +42,7 @@
   },
   "homepage": "https://github.com/tazama-lf/rule-901#readme",
   "dependencies": {
-    "@tazama-lf/frms-coe-lib": "8.0.0-rc.5",
+    "@tazama-lf/frms-coe-lib": "8.2.0-rc.6",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -67,5 +68,9 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "uuid": "^11.1.1",
+    "@opentelemetry/core": "^2.8.0"
   }
 }
