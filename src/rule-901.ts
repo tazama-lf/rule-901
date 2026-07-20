@@ -67,6 +67,7 @@ export async function handleTransaction(
 FROM transaction tr
 WHERE tr.destination = $1
 AND tr."txtp" = 'pacs.002.001.12'
+AND tr."credttm"::timestamptz <= $2::timestamptz
 AND ($2::timestamptz - tr."credttm"::timestamptz) <= $3 * interval '1 millisecond'
 AND tr.tenantId = $4;`;
 

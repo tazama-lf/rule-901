@@ -303,3 +303,22 @@ describe('Unsupported transaction type', () => {
     expect(querySpy).not.toHaveBeenCalled();
   });
 });
+
+describe('Query construction', () => {
+  test('should bound the count to transactions at or before the incoming transaction timestamp', async () => {
+    const mockQueryFn = jest.fn().mockResolvedValue({ rows: [{ length: 1 }] });
+    databaseManager._eventHistory.query = mockQueryFn;
+
+    await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
+
+    expect(mockQueryFn).toHaveBeenCalledTimes(1);
+    const [queryString, values] = mockQueryFn.mock.calls[0];
+
+    // The upper bound prevents counting transactions newer than the incoming transaction
+    expect(queryString).toContain('tr."credttm"::timestamptz <= $2::timestamptz');
+    // The lower bound keeps the lookback window
+    expect(queryString).toContain(`($2::timestamptz - tr."credttm"::timestamptz) <= $3 * interval '1 millisecond'`);
+    expect(values[1]).toBe(req.transaction.FIToFIPmtSts.GrpHdr.CreDtTm);
+    expect(values[2]).toBe(ruleConfig.config.parameters!.maxQueryRange);
+  });
+});
