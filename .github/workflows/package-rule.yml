@@ -1,37 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
-
-# Caller workflow: builds and pushes the stable Docker image for this rule processor.
-#
-# Triggers:
-#   - Automatically on push to the target branch (main) after stable release merge.
-#   - Manually via workflow_dispatch.
-#
-# Produces a versioned Docker tag and the :latest pointer for this rule.
-#
 # This file is managed centrally - do not edit manually.
 # To change build behaviour, update the reusable workflow in tazama-lf/workflows.
-
-name: Package stable rule image
-
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
-
-permissions:
-  contents: read
-  packages: read
-  pull-requests: read
-
 jobs:
-  package-rule:
-    uses: tazama-lf/workflows/.github/workflows/package-rule.yml@v1
+  build:
+    uses: tazama-lf/workflows/.github/workflows/package-rule.yml@main
     with:
-      rule_number: ${{ vars.RULE_NUMBER || '901' }}
-      rule_org: ${{ vars.RULE_ORG || 'frmscoe' }}
-      node_version: ${{ vars.NODE_VERSION || '22' }}
-      rule_executer_repo: ${{ vars.RULE_EXECUTER_REPO || 'tazama-lf/rule-executer' }}
-      rule_executer_branch: ${{ vars.RULE_EXECUTER_BRANCH || 'main' }}
-      docker_image_namespace: ${{ vars.DOCKER_IMAGE_NAMESPACE || 'tazamaorg' }}
+      rule_number: "901"
+      rule_org: "tazama-lf"
     secrets: inherit
