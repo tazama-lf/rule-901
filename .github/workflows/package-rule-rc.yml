@@ -1,16 +1,35 @@
 # SPDX-License-Identifier: Apache-2.0
+
+# Caller workflow: builds and pushes the RC Docker image for this rule processor.
+#
+# Triggers:
+#   - Automatically on push to the source branch (dev) for rc package versions.
+#   - Manually via workflow_dispatch.
+#
 # This file is managed centrally - do not edit manually.
 # To change build behaviour, update the reusable workflow in tazama-lf/workflows.
+
+name: Package RC rule image
+
 on:
   push:
-    branches: [dev]
-  repository_dispatch:
-    types: [rule-executer-update]
+    branches:
+      - dev
   workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+  pull-requests: read
+
 jobs:
-  build:
-    uses: tazama-lf/workflows/.github/workflows/package-rule-rc.yml@dev
+  package-rule-rc:
+    uses: tazama-lf/workflows/.github/workflows/package-rule-rc.yml@v1
     with:
-      rule_number: "901"
-      rule_org: "tazama-lf"
+      rule_number: ${{ vars.RULE_NUMBER || '901' }}
+      rule_org: ${{ vars.RULE_ORG || 'frmscoe' }}
+      node_version: ${{ vars.NODE_VERSION || '22' }}
+      rule_executer_repo: ${{ vars.RULE_EXECUTER_REPO || 'tazama-lf/rule-executer' }}
+      rule_executer_branch: ${{ vars.RULE_EXECUTER_BRANCH || 'dev' }}
+      docker_image_namespace: ${{ vars.DOCKER_IMAGE_NAMESPACE || 'tazamaorg' }}
     secrets: inherit
