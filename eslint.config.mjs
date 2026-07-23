@@ -33,6 +33,7 @@ export default defineConfig([
       '@eslint-community/eslint-comments/require-description': ['error', { ignore: ['eslint-enable'] }],
       '@eslint-community/eslint-comments/disable-enable-pair': 'error',
       '@typescript-eslint/class-methods-use-this': 'off',
+      '@typescript-eslint/unified-signatures': 'off', // crashes on SupportedTransactionMessage union param (eslint-plugin bug in <=8.46.2)
       '@typescript-eslint/init-declarations': 'off',
       '@typescript-eslint/max-params': ['warn', { max: 5 }],
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -48,7 +49,7 @@ export default defineConfig([
       '@typescript-eslint/prefer-optional-chain': 'warn',
       '@typescript-eslint/restrict-template-expressions': 'error',
       '@typescript-eslint/strict-boolean-expressions': 'off',
-      '@stylistic/quotes': ['error', 'single'],
+      '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
       'complexity': ['warn', { max: 25 }],
       'max-depth': ['warn', { max: 5 }],
       'max-lines': 'off',

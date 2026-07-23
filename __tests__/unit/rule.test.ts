@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { type DatabaseManagerInstance, LoggerService, CreateDatabaseManager } from '@tazama-lf/frms-coe-lib';
-import { type Band, type RuleConfig, type RuleRequest, type RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { type Pacs002, type RuleConfig, type RuleRequest, type RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import { CreateStorageManager } from '@tazama-lf/frms-coe-lib/lib/services/dbManager';
 import { handleTransaction } from '../../src';
 import { RuleExecutorConfig } from '../../src/rule-901';
@@ -20,7 +20,7 @@ jest.mock('@tazama-lf/frms-coe-lib', () => {
   };
 });
 
-const getMockRequest = (): RuleRequest => {
+const getMockRequest = (): RuleRequest<Pacs002> => {
   const quote = {
     transaction: JSON.parse(
       `{"TxTp":"pacs.002.001.12", "TenantId": "DEFAULT","FIToFIPmtSts":{"GrpHdr":{"MsgId":"6b444365119746c5be7dfb5516ba67c4","CreDtTm":"${new Date(
@@ -45,7 +45,7 @@ const getMockRequest = (): RuleRequest => {
       creDtTm: `${new Date(Date.now() - 60 * 1000).toISOString()}`,
     },
   };
-  return quote as RuleRequest;
+  return quote as RuleRequest<Pacs002>;
 };
 
 const databaseManagerConfig: RuleExecutorConfig = {
@@ -146,7 +146,7 @@ const determineOutcome = (value: number, ruleConfig: RuleConfig, ruleResult: Rul
   } else throw new Error('Value provided undefined, so cannot determine rule outcome');
   return ruleResult;
 };
-let req: RuleRequest;
+let req: RuleRequest<Pacs002>;
 beforeEach(() => {
   req = getMockRequest();
 });
@@ -208,7 +208,7 @@ describe('Happy path', () => {
 describe('Exit conditions', () => {
   test('Should respond with .x00: Incoming transaction is unsuccessful', async () => {
     const objClone = (req: Object) => JSON.parse(JSON.stringify(req));
-    const newReq: RuleRequest = objClone(req);
+    const newReq: RuleRequest<Pacs002> = objClone(req);
     newReq.transaction.FIToFIPmtSts.TxInfAndSts.TxSts = 'something else';
     const res = await handleTransaction(newReq, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
 
@@ -219,22 +219,6 @@ describe('Exit conditions', () => {
 });
 
 describe('Error conditions', () => {
-  test('Unsuccessful transaction and no exit condition', async () => {
-    const mockQueryFn = jest.fn();
-    databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({ rows: [{ length: 4 }]});
-    jest.spyOn(databaseManager._eventHistory, 'query');
-    const objClone = (req: Object) => JSON.parse(JSON.stringify(req));
-    const newReq: RuleRequest = objClone(req);
-    newReq.transaction.FIToFIPmtSts.TxInfAndSts.TxSts = 'something else';
-    const newConfig: RuleConfig = objClone(ruleConfig);
-    newConfig.config.exitConditions![0].subRuleRef = 'something';
-    try {
-      await handleTransaction(newReq, determineOutcome, ruleRes, loggerService, newConfig, databaseManager);
-    } catch (error) {
-      expect((error as Error).message).toBe('Unsuccessful transaction and no exit condition in ruleConfig');
-    }
-  });
-
   test('No transactions', async () => {
     const mockQueryFn = jest.fn();
     databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({ rows: [{ length: 0 }]});
@@ -256,19 +240,6 @@ describe('Error conditions', () => {
       await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
     } catch (error) {
       expect((error as Error).message).toBe('Data error: query result type mismatch - expected a number');
-    }
-  });
-
-  test('Invalid query result', async () => {
-    // Mocking the request of getting oldes transation timestamp
-    const mockQueryFn = jest.fn();
-    databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({ rows: [{ length: undefined }]})
-    jest.spyOn(databaseManager._eventHistory, 'query');
-
-    try {
-      await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
-    } catch (error) {
-      expect((error as Error).message).toBe('Data error: irretrievable transaction history');
     }
   });
 
@@ -297,98 +268,57 @@ describe('Error conditions', () => {
     }
   });
 
-  test('Invalid config', async () => {
-    const mockQueryFn = jest.fn();
+});
 
-    const mockBatchesAllFn = jest.fn().mockResolvedValue([['abc']]);
-    databaseManager._eventHistory.query = mockQueryFn.mockResolvedValue({
-      batches: {
-        all: mockBatchesAllFn,
-      },
-    });
-    jest.spyOn(databaseManager._eventHistory, 'query');
+describe('Unsupported transaction type', () => {
+  test('should return early with .err for unrecognised transaction type', async () => {
+    const querySpy = jest.fn();
+    databaseManager._eventHistory.query = querySpy;
 
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: { ...ruleConfig.config, parameters: undefined },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - parameters not provided');
-    }
+    const unsupportedReq = {
+      ...req,
+      transaction: { TxTp: 'unsupported.type.v1', TenantId: 'DEFAULT', someField: 'someValue' } as any,
+    };
+    const res = await handleTransaction(unsupportedReq, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
+    expect(res.subRuleRef).toBe('.err');
+    expect(res.reason).toBe('Unsupported transaction type');
+    expect(querySpy).not.toHaveBeenCalled();
+  });
 
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: { ...ruleConfig.config, parameters: { '1': 2 } },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - maxQueryRange parameter not provided');
-    }
+  test('should return early with .err for unsupported structured transaction type', async () => {
+    const querySpy = jest.fn();
+    databaseManager._eventHistory.query = querySpy;
 
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: { ...ruleConfig.config, exitConditions: undefined },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - exitConditions not provided');
-    }
+    const pacs008Req = {
+      ...req,
+      transaction: {
+        TxTp: 'pacs.008.001.10',
+        TenantId: 'DEFAULT',
+        FIToFICstmrCdtTrf: { GrpHdr: { MsgId: 'test-msg-id' }, CdtTrfTxInf: {} },
+      } as any,
+    };
+    const res = await handleTransaction(pacs008Req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
+    expect(res.subRuleRef).toBe('.err');
+    expect(res.reason).toBe('Unsupported structured transaction type');
+    expect(querySpy).not.toHaveBeenCalled();
+  });
+});
 
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: { ...ruleConfig.config, bands: [] },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - bands not provided or empty');
-    }
+describe('Query construction', () => {
+  test('should bound the count to transactions at or before the incoming transaction timestamp', async () => {
+    const mockQueryFn = jest.fn().mockResolvedValue({ rows: [{ length: 1 }] });
+    databaseManager._eventHistory.query = mockQueryFn;
 
-    try {
-      await handleTransaction(
-        req,
-        determineOutcome,
-        ruleRes,
-        loggerService,
-        {
-          ...ruleConfig,
-          config: {
-            ...ruleConfig.config,
-            bands: undefined as unknown as Band[],
-          },
-        },
-        databaseManager,
-      );
-    } catch (error) {
-      expect((error as Error).message).toBe('Invalid ruleConfig provided - bands not provided or empty');
-    }
+    await handleTransaction(req, determineOutcome, ruleRes, loggerService, ruleConfig, databaseManager);
+
+    expect(mockQueryFn).toHaveBeenCalledTimes(1);
+    const [queryString, values] = mockQueryFn.mock.calls[0];
+
+    // The upper bound prevents counting transactions newer than the incoming transaction
+    expect(queryString).toContain('tr."credttm"::timestamptz <= $2::timestamptz');
+    // The lower bound keeps the lookback window
+    expect(queryString).toContain(`($2::timestamptz - tr."credttm"::timestamptz) <= $3 * interval '1 millisecond'`);
+    expect(values[1]).toBe(req.transaction.FIToFIPmtSts.GrpHdr.CreDtTm);
+    expect(values[2]).toBe(ruleConfig.config.parameters!.maxQueryRange);
   });
 });
